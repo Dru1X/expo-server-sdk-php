@@ -3,8 +3,11 @@
 namespace Dru1x\ExpoPush;
 
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
+use Dru1x\ExpoPush\Collections\PushReceiptCollection;
+use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
 use Dru1x\ExpoPush\Data\PushMessage;
+use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
 use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
@@ -40,6 +43,29 @@ class ExpoPushClient extends Connector
         // TODO: Automatically chunk the push messages and send them in concurrent requests
         $response = $this->send(
             new SendNotificationsRequest($pushMessages)
+        );
+
+        return $response->dtoOrFail();
+    }
+
+    /**
+     * Get available push receipts with the given IDs
+     *
+     * @param PushReceiptIdCollection|string[] $receiptIds
+     *
+     * @return PushReceiptCollection
+     * @throws FatalRequestException
+     * @throws RequestException
+     */
+    public function getReceipts(PushReceiptIdCollection|array $receiptIds): PushReceiptCollection
+    {
+        if (is_array($receiptIds)) {
+            $receiptIds = new PushReceiptIdCollection(...$receiptIds);
+        }
+
+        // TODO: Automatically chunk the push tickets and send them in concurrent requests
+        $response = $this->send(
+            new GetReceiptsRequest($receiptIds)
         );
 
         return $response->dtoOrFail();
