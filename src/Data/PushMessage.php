@@ -32,6 +32,38 @@ readonly class PushMessage implements JsonSerializable
         public bool                          $_contentAvailable = false,
     ) {}
 
+    // Helpers ----
+
+    /**
+     * Make a copy of this PushMessage, optionally overriding the recipients
+     *
+     * @param PushTokenCollection|PushToken|null $to
+     *
+     * @return self
+     */
+    public function copy(PushTokenCollection|PushToken|null $to): static
+    {
+        return new PushMessage(
+            to: $to ?? $this->to,
+            title: $this->title,
+            subtitle: $this->subtitle,
+            body: $this->body,
+            ttl: $this->ttl,
+            data: $this->data,
+            expiration: $this->expiration,
+            priority: $this->priority,
+            sound: $this->sound,
+            badge: $this->badge,
+            interruptionLevel: $this->interruptionLevel,
+            channelId: $this->channelId,
+            icon: $this->icon,
+            richContent: $this->richContent,
+            categoryId: $this->categoryId,
+            mutableContent: $this->mutableContent,
+            _contentAvailable: $this->_contentAvailable,
+        );
+    }
+
     // Internals ----
 
     /** @inheritDoc */

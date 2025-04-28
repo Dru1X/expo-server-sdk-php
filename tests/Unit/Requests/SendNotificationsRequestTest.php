@@ -118,7 +118,7 @@ class SendNotificationsRequestTest extends TestCase
     #[Test]
     public function body_throws_exception_when_push_message_collection_is_too_large(): void
     {
-        $messageCount = SendNotificationsRequest::MAX_MESSAGE_COUNT + 1;
+        $messageCount = SendNotificationsRequest::MAX_NOTIFICATION_COUNT + 1;
         $messages     = [];
 
         for ($i = 0; $i <= $messageCount; $i++) {

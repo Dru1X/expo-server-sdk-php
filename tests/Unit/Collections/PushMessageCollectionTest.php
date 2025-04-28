@@ -3,13 +3,97 @@
 namespace Dru1x\ExpoPush\Tests\Unit\Collections;
 
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
+use Dru1x\ExpoPush\Collections\PushTokenCollection;
 use Dru1x\ExpoPush\Data\PushMessage;
 use Dru1x\ExpoPush\Data\PushToken;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use ValueError;
 
 class PushMessageCollectionTest extends TestCase
 {
+    #[Test]
+    public function notification_count_correctly_counts_resultant_notifications(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
+            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
+            new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
+            new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
+            new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
+            new PushMessage(to: new PushTokenCollection(
+                new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
+                new PushToken('ExponentPushToken[dddddddddddddddddddddd]'),
+                new PushToken('ExponentPushToken[eeeeeeeeeeeeeeeeeeeeee]'),
+                new PushToken('ExponentPushToken[ffffffffffffffffffffff]'),
+                new PushToken('ExponentPushToken[gggggggggggggggggggggg]'),
+                new PushToken('ExponentPushToken[hhhhhhhhhhhhhhhhhhhhhh]'),
+            ), title: 'Test Notification 6'),
+        );
+
+        $count = $collection->notificationCount();
+
+        $this->assertEquals(11, $count);
+    }
+
+    #[Test]
+    public function chunk_by_notifications_correctly_splits_up_push_messages(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
+            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
+            new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
+            new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
+            new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
+            new PushMessage(to: new PushTokenCollection(
+                new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
+                new PushToken('ExponentPushToken[dddddddddddddddddddddd]'),
+                new PushToken('ExponentPushToken[eeeeeeeeeeeeeeeeeeeeee]'),
+                new PushToken('ExponentPushToken[ffffffffffffffffffffff]'),
+                new PushToken('ExponentPushToken[gggggggggggggggggggggg]'),
+                new PushToken('ExponentPushToken[hhhhhhhhhhhhhhhhhhhhhh]'),
+            ), title: 'Test Notification 6'),
+        );
+
+        $chunks = $collection->chunkByNotifications(3);
+
+        $this->assertCount(4, $chunks);
+
+        $this->assertCount(3, $chunks[0]);
+        $this->assertEquals('Test Notification 1', $chunks[0]->get(0)->title);
+        $this->assertEquals('Test Notification 2', $chunks[0]->get(1)->title);
+        $this->assertEquals('Test Notification 3', $chunks[0]->get(2)->title);
+
+        $this->assertCount(3, $chunks[1]);
+        $this->assertEquals('Test Notification 4', $chunks[1]->get(0)->title);
+        $this->assertEquals('Test Notification 5', $chunks[1]->get(1)->title);
+        $this->assertEquals('Test Notification 6', $chunks[1]->get(2)->title);
+
+        $this->assertCount(1, $chunks[2]);
+        $this->assertEquals('Test Notification 6', $chunks[2]->get(0)->title);
+        $this->assertCount(3, $chunks[2]->get(0)->to);
+
+        $this->assertCount(1, $chunks[3]);
+        $this->assertEquals('Test Notification 6', $chunks[3]->get(0)->title);
+        $this->assertCount(2, $chunks[3]->get(0)->to);
+    }
+
+    #[Test]
+    public function chunk_by_notifications_throws_exception_if_size_is_less_than_one(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
+            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
+            new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
+            new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
+            new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
+        );
+
+        $this->expectException(ValueError::class);
+
+        $collection->chunkByNotifications(0);
+    }
+
     #[Test]
     public function collection_is_iterable(): void
     {

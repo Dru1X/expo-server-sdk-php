@@ -22,7 +22,7 @@ class SendNotificationsRequest extends Request implements HasBody
 {
     use AcceptsJson, HasJsonBody;
 
-    public const int MAX_MESSAGE_COUNT = 100;
+    public const int MAX_NOTIFICATION_COUNT = 100;
     public const int MAX_MESSAGE_DATA_BYTES = 4096;
 
     protected Method $method = Method::POST;
@@ -73,15 +73,15 @@ class SendNotificationsRequest extends Request implements HasBody
     }
 
     /**
-     * Prevent the max number of messages per request being exceeded
+     * Prevent the max number of notifications per request being exceeded
      *
      * @return void
      */
     protected function preventTooManyMessages(): void
     {
-        if ($this->pushMessages->count() > self::MAX_MESSAGE_COUNT) {
+        if ($this->pushMessages->notificationCount() > self::MAX_NOTIFICATION_COUNT) {
             throw new OverflowException(
-                "Cannot send more than " . self::MAX_MESSAGE_COUNT . " push messages per request"
+                "Cannot send more than " . self::MAX_NOTIFICATION_COUNT . " notifications per request"
             );
         }
     }
