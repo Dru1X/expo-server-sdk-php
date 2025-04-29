@@ -26,8 +26,8 @@
     "phpunit/phpunit": "^12.1"
   },
   "scripts": {
-    "test": "phpunit --testdox",
-    "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    "test": "vendor/bin/phpunit --testdox",
+    "test-coverage": "@test --coverage-html coverage"
   },
   "autoload": {
     "psr-4": {

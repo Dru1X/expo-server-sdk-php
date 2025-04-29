@@ -87,6 +87,24 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     }
 
     /**
+     * Merge a set of collections into a single collection
+     *
+     * @param static<TKey, TValue> ...$collections
+     *
+     * @return static<TKey, TValue>
+     */
+    public function merge(self ...$collections): static
+    {
+        $items = array_reduce(
+            $collections,
+            fn(array $carry, self $collection) => array_merge($carry, $collection->items),
+            $this->items
+        );
+
+        return new static(...$items);
+    }
+
+    /**
      * Convert this collection to an array
      *
      * @return array<TKey, TValue>

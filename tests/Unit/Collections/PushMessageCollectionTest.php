@@ -95,6 +95,42 @@ class PushMessageCollectionTest extends TestCase
     }
 
     #[Test]
+    public function get_push_tokens_returns_correctly_ordered_push_token_collection(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
+            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
+            new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
+            new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
+            new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
+            new PushMessage(to: new PushTokenCollection(
+                new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
+                new PushToken('ExponentPushToken[dddddddddddddddddddddd]'),
+                new PushToken('ExponentPushToken[eeeeeeeeeeeeeeeeeeeeee]'),
+                new PushToken('ExponentPushToken[ffffffffffffffffffffff]'),
+                new PushToken('ExponentPushToken[gggggggggggggggggggggg]'),
+                new PushToken('ExponentPushToken[hhhhhhhhhhhhhhhhhhhhhh]'),
+            ), title: 'Test Notification 6'),
+        );
+
+        $tokens = $collection->getPushTokens();
+
+        $this->assertCount(11, $tokens);
+
+        $this->assertEquals('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $tokens->get(0)->toString());
+        $this->assertEquals('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]', $tokens->get(1)->toString());
+        $this->assertEquals('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]', $tokens->get(2)->toString());
+        $this->assertEquals('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]', $tokens->get(3)->toString());
+        $this->assertEquals('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]', $tokens->get(4)->toString());
+        $this->assertEquals('ExponentPushToken[cccccccccccccccccccccc]', $tokens->get(5)->toString());
+        $this->assertEquals('ExponentPushToken[dddddddddddddddddddddd]', $tokens->get(6)->toString());
+        $this->assertEquals('ExponentPushToken[eeeeeeeeeeeeeeeeeeeeee]', $tokens->get(7)->toString());
+        $this->assertEquals('ExponentPushToken[ffffffffffffffffffffff]', $tokens->get(8)->toString());
+        $this->assertEquals('ExponentPushToken[gggggggggggggggggggggg]', $tokens->get(9)->toString());
+        $this->assertEquals('ExponentPushToken[hhhhhhhhhhhhhhhhhhhhhh]', $tokens->get(10)->toString());
+    }
+
+    #[Test]
     public function collection_is_iterable(): void
     {
         $collection = new PushMessageCollection(

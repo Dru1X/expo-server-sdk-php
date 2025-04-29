@@ -17,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 use Saloon\Config;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
+use Saloon\Http\PendingRequest;
 
 class ExpoPushClientTest extends TestCase
 {
@@ -46,12 +47,12 @@ class ExpoPushClientTest extends TestCase
             ],
         ];
 
-        $this->mockClient->addResponses([
-            SendNotificationsRequest::class => MockResponse::make(
+        $this->mockClient->addResponse(
+            MockResponse::make(
                 body: $responseBody,
                 headers: ['Content-Type' => 'application/json']
-            ),
-        ]);
+            )
+        );
 
         $messages = new PushMessageCollection(
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification'),
@@ -74,6 +75,35 @@ class ExpoPushClientTest extends TestCase
     }
 
     #[Test]
+    public function send_notifications_handles_large_push_message_collection(): void
+    {
+        $messages = $this->generatePushMessages(1000);
+
+        foreach ($messages->chunk(100) as $messageChunk) {
+
+            $responseBody = [
+                'data' => array_map(fn(PushMessage $message) => [
+                    'status' => 'ok',
+                    'id'     => $this->generatePushReceiptId(),
+                ], $messageChunk->toArray()),
+            ];
+
+            $this->mockClient->addResponse(
+                MockResponse::make(
+                    body: $responseBody,
+                    headers: ['Content-Type' => 'application/json']
+                )
+            );
+        }
+
+        $tickets = $this->expoPush->sendNotifications($messages);
+
+        $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
+
+        $this->assertCount(1000, $tickets);
+    }
+
+    #[Test]
     public function send_notifications_handles_push_message_array(): void
     {
         $responseData = [
@@ -84,12 +114,12 @@ class ExpoPushClientTest extends TestCase
             ],
         ];
 
-        $this->mockClient->addResponses([
-            SendNotificationsRequest::class => MockResponse::make(
+        $this->mockClient->addResponse(
+            MockResponse::make(
                 body: $responseData,
                 headers: ['Content-Type' => 'application/json']
             ),
-        ]);
+        );
 
         $messages = [
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification'),
@@ -112,6 +142,35 @@ class ExpoPushClientTest extends TestCase
     }
 
     #[Test]
+    public function send_notifications_handles_large_push_message_array(): void
+    {
+        $messages = $this->generatePushMessages(1000)->toArray();
+
+        foreach (array_chunk($messages, 100) as $messageChunk) {
+
+            $responseBody = [
+                'data' => array_map(fn(PushMessage $message) => [
+                    'status' => 'ok',
+                    'id'     => $this->generatePushReceiptId(),
+                ], $messageChunk),
+            ];
+
+            $this->mockClient->addResponse(
+                MockResponse::make(
+                    body: $responseBody,
+                    headers: ['Content-Type' => 'application/json']
+                )
+            );
+        }
+
+        $tickets = $this->expoPush->sendNotifications($messages);
+
+        $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
+
+        $this->assertCount(1000, $tickets);
+    }
+
+    #[Test]
     public function get_receipts_handles_push_receipt_id_collection(): void
     {
         $responseData = [
@@ -122,12 +181,12 @@ class ExpoPushClientTest extends TestCase
             ],
         ];
 
-        $this->mockClient->addResponses([
-            GetReceiptsRequest::class => MockResponse::make(
+        $this->mockClient->addResponse(
+            MockResponse::make(
                 body: $responseData,
                 headers: ['Content-Type' => 'application/json']
             ),
-        ]);
+        );
 
         $receiptIds = new PushReceiptIdCollection(
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -160,12 +219,12 @@ class ExpoPushClientTest extends TestCase
             ],
         ];
 
-        $this->mockClient->addResponses([
-            GetReceiptsRequest::class => MockResponse::make(
+        $this->mockClient->addResponse(
+            MockResponse::make(
                 body: $responseData,
                 headers: ['Content-Type' => 'application/json']
             ),
-        ]);
+        );
 
         $receiptIds = [
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -185,5 +244,43 @@ class ExpoPushClientTest extends TestCase
             $this->assertEmpty($receipt->message);
             $this->assertEmpty($receipt->details);
         }
+    }
+
+    #[Test]
+    public function sdk_version_returns_correct_version(): void
+    {
+        $composer = json_decode(
+            file_get_contents(dirname(__DIR__, 2) . '/composer.json')
+        );
+
+        $this->assertEquals($composer->version, $this->expoPush->sdkVersion());
+    }
+
+    // Helpers ----
+
+    protected function generatePushMessages(int $count): PushMessageCollection
+    {
+        $messages = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $tokenValue = bin2hex(random_bytes(11));
+
+            $messages[] = new PushMessage(
+                to: new PushToken("ExponentPushToken[$tokenValue]"),
+                title: "Test Notification $i",
+                body: "A simple test push notification"
+            );
+        }
+
+        return new PushMessageCollection(...$messages);
+    }
+
+    protected function generatePushReceiptId(): string
+    {
+        $data    = random_bytes(16);
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 }
