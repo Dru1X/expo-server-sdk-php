@@ -37,6 +37,80 @@ class SendNotificationsRequestTest extends TestCase
     }
 
     #[Test]
+    public function body_compresses_when_size_is_over_one_kib(): void
+    {
+        // Approximately 1800 bytes of data
+        $pushMessages = array_fill(0, 25, new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            title: "Test Notification"
+        ));
+
+        $request = new SendNotificationsRequest(
+            new PushMessageCollection(...$pushMessages)
+        );
+
+        $this->mockClient->addResponse(MockResponse::make());
+
+        $this->connector->send($request);
+
+        $lastPendingRequest = $this->mockClient->getLastPendingRequest();
+
+        $this->assertEquals('gzip', $lastPendingRequest->headers()->get('Content-Encoding'));
+        $this->assertEquals(gzcompress((string)$request->body()), $lastPendingRequest->body()->all());
+    }
+
+    #[Test]
+    public function body_doesnt_compress_when_size_is_under_one_kib(): void
+    {
+        // Approximately 360 bytes of data
+        $pushMessages = array_fill(0, 5, new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            title: "Test Notification"
+        ));
+
+        $request = new SendNotificationsRequest(
+            new PushMessageCollection(...$pushMessages)
+        );
+
+        $this->mockClient->addResponse(MockResponse::make());
+
+        $this->connector->send($request);
+
+        $this->assertNull($this->mockClient->getLastPendingRequest()?->headers()->get('Content-Encoding'));
+    }
+
+    #[Test]
+    public function body_throws_exception_when_any_push_message_data_is_too_large(): void
+    {
+        $contentBytes = SendNotificationsRequest::MAX_MESSAGE_DATA_BYTES + 1;
+        $content      = bin2hex(random_bytes($contentBytes / 2));
+
+        $messages = new PushMessageCollection(
+            new PushMessage(
+                to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                title: 'Test Notification 1'
+            ),
+            new PushMessage(
+                to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+                title: 'Test Notification 2'
+            ),
+            new PushMessage(
+                to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+                title: 'Test Notification 3',
+                data: [
+                    'content' => $content,
+                ]
+            ),
+        );
+
+        $request = new SendNotificationsRequest($messages);
+
+        $this->expectException(OverflowException::class);
+
+        $request->body();
+    }
+
+    #[Test]
     public function create_dto_from_response_returns_push_ticket_collection(): void
     {
         $request = new SendNotificationsRequest(
@@ -166,37 +240,6 @@ class SendNotificationsRequestTest extends TestCase
         $request = new SendNotificationsRequest($messages);
 
         $this->expectException(InvalidArgumentException::class);
-
-        $request->body();
-    }
-
-    #[Test]
-    public function body_throws_exception_when_any_push_message_data_is_too_large(): void
-    {
-        $contentBytes = SendNotificationsRequest::MAX_MESSAGE_DATA_BYTES + 1;
-        $content      = bin2hex(random_bytes($contentBytes / 2));
-
-        $messages = new PushMessageCollection(
-            new PushMessage(
-                to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                title: 'Test Notification 1'
-            ),
-            new PushMessage(
-                to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-                title: 'Test Notification 2'
-            ),
-            new PushMessage(
-                to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
-                title: 'Test Notification 3',
-                data: [
-                    'content' => $content,
-                ]
-            ),
-        );
-
-        $request = new SendNotificationsRequest($messages);
-
-        $this->expectException(OverflowException::class);
 
         $request->body();
     }
