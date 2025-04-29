@@ -3,6 +3,7 @@
 namespace Dru1x\ExpoPush\Collections;
 
 use Dru1x\ExpoPush\Data\PushMessage;
+use Dru1x\ExpoPush\Data\PushToken;
 use ValueError;
 
 /**
@@ -105,5 +106,21 @@ class PushMessageCollection extends Collection
 
         // Convert the chunks into PushMessageCollection objects
         return array_map(fn(array $chunk) => new static(...$chunk), $chunks);
+    }
+
+    /**
+     * Get an ordered collection of all push tokens used by the push messages in this collection
+     *
+     * @return PushTokenCollection
+     */
+    public function getPushTokens(): PushTokenCollection
+    {
+        $extractPushTokens = fn(array $carry, PushMessage $message) => array_merge($carry,
+            $message->to instanceof PushToken ? [$message->to] : $message->to->toArray()
+        );
+
+        return new PushTokenCollection(
+            ...array_reduce($this->items, $extractPushTokens, [])
+        );
     }
 }
