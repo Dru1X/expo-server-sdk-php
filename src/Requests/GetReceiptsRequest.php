@@ -6,6 +6,7 @@ use Dru1x\ExpoPush\Collections\PushReceiptCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Data\PushReceipt;
 use Dru1x\ExpoPush\Enums\PushStatus;
+use Dru1x\ExpoPush\Traits\CompressesBody;
 use JsonException;
 use OverflowException;
 use RuntimeException;
@@ -19,7 +20,7 @@ use UnexpectedValueException;
 
 class GetReceiptsRequest extends Request implements HasBody
 {
-    use AcceptsJson, HasJsonBody;
+    use AcceptsJson, HasJsonBody, CompressesBody;
 
     public const int MAX_RECEIPT_COUNT = 1000;
 

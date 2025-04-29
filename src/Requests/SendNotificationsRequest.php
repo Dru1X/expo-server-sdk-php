@@ -6,6 +6,7 @@ use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
 use Dru1x\ExpoPush\Data\PushTicket;
 use Dru1x\ExpoPush\Enums\PushStatus;
+use Dru1x\ExpoPush\Traits\CompressesBody;
 use InvalidArgumentException;
 use JsonException;
 use OverflowException;
@@ -20,7 +21,7 @@ use UnexpectedValueException;
 
 class SendNotificationsRequest extends Request implements HasBody
 {
-    use AcceptsJson, HasJsonBody;
+    use AcceptsJson, HasJsonBody, CompressesBody;
 
     public const int MAX_NOTIFICATION_COUNT = 100;
     public const int MAX_MESSAGE_DATA_BYTES = 4096;

@@ -15,6 +15,8 @@ use RuntimeException;
 use Saloon\Config;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
+use Saloon\Http\PendingRequest;
+use Saloon\Http\Request;
 use UnexpectedValueException;
 
 class GetReceiptsRequestTest extends TestCase
@@ -32,6 +34,64 @@ class GetReceiptsRequestTest extends TestCase
         $this->connector  = new ExpoPushClient()->withMockClient($this->mockClient);
 
         Config::preventStrayRequests();
+    }
+
+    #[Test]
+    public function body_compresses_when_size_is_over_one_kib(): void
+    {
+        // Approximately 1800 bytes of data
+        $receiptIds = array_fill(0, 50, 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+
+        $request = new GetReceiptsRequest(
+            new PushReceiptIdCollection(...$receiptIds)
+        );
+
+        $this->mockClient->addResponse(MockResponse::make());
+
+        $this->connector->send($request);
+
+        $lastPendingRequest = $this->mockClient->getLastPendingRequest();
+
+        $this->assertEquals('gzip', $lastPendingRequest->headers()->get('Content-Encoding'));
+        $this->assertEquals(gzcompress((string)$request->body()), $lastPendingRequest->body()->all());
+    }
+
+    #[Test]
+    public function body_doesnt_compress_when_size_is_under_one_kib(): void
+    {
+        // Approximately 180 bytes of data
+        $receiptIds = array_fill(0, 5, 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+
+        $request = new GetReceiptsRequest(
+            new PushReceiptIdCollection(...$receiptIds)
+        );
+
+        $this->mockClient->addResponse(MockResponse::make());
+
+        $this->connector->send($request);
+
+        $lastPendingRequest = $this->mockClient->getLastPendingRequest();
+
+        $this->assertNull($lastPendingRequest->headers()->get('Content-Encoding'));
+    }
+
+    #[Test]
+    public function body_throws_exception_when_push_ticket_collection_is_too_large(): void
+    {
+        $receiptCount   = GetReceiptsRequest::MAX_RECEIPT_COUNT + 1;
+        $pushReceiptIds = [];
+
+        for ($i = 0; $i <= $receiptCount; $i++) {
+            $pushReceiptIds[] = (string)$i;
+        }
+
+        $request = new GetReceiptsRequest(
+            new PushReceiptIdCollection(...$pushReceiptIds)
+        );
+
+        $this->expectException(OverflowException::class);
+
+        $request->body();
     }
 
     #[Test]
@@ -111,24 +171,5 @@ class GetReceiptsRequestTest extends TestCase
         $request->createDtoFromResponse(
             $this->connector->send($request)
         );
-    }
-
-    #[Test]
-    public function body_throws_exception_when_push_ticket_collection_is_too_large(): void
-    {
-        $receiptCount   = GetReceiptsRequest::MAX_RECEIPT_COUNT + 1;
-        $pushReceiptIds = [];
-
-        for ($i = 0; $i <= $receiptCount; $i++) {
-            $pushReceiptIds[] = (string)$i;
-        }
-
-        $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(...$pushReceiptIds)
-        );
-
-        $this->expectException(OverflowException::class);
-
-        $request->body();
     }
 }
