@@ -5,7 +5,9 @@ namespace Dru1x\ExpoPush\Requests;
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
 use Dru1x\ExpoPush\Data\PushTicket;
+use Dru1x\ExpoPush\Data\PushTicketDetails;
 use Dru1x\ExpoPush\Enums\PushStatus;
+use Dru1x\ExpoPush\Enums\PushTicketErrorCode;
 use Dru1x\ExpoPush\Traits\CompressesBody;
 use InvalidArgumentException;
 use JsonException;
@@ -58,7 +60,11 @@ class SendNotificationsRequest extends Request implements HasBody
                 status: PushStatus::from($ticketData['status']),
                 receiptId: $ticketData['id'] ?? null,
                 message: $ticketData['message'] ?? null,
-                details: $ticketData['details'] ?? null,
+                details: isset($ticketData['details']) ?
+                    new PushTicketDetails(
+                        error: PushTicketErrorCode::tryFrom($ticketData['details']['error'] ?? null),
+                        expoPushToken: $ticketData['details']['expoPushToken'] ?? null
+                    ) : null,
             ), $data)
         );
     }

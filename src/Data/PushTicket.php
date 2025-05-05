@@ -11,10 +11,10 @@ readonly class PushTicket implements JsonSerializable
     use ConvertsToJson;
 
     public function __construct(
-        public PushStatus $status,
-        public ?string    $receiptId = null,
-        public ?string    $message = null,
-        public ?array     $details = null,
+        public PushStatus         $status,
+        public ?string            $receiptId = null,
+        public ?string            $message = null,
+        public ?PushTicketDetails $details = null,
     ) {}
 
     // Internals ----
@@ -26,6 +26,5 @@ readonly class PushTicket implements JsonSerializable
             get_object_vars($this)
         );
     }
-
 
 }
