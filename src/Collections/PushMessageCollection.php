@@ -113,7 +113,7 @@ class PushMessageCollection extends Collection
      *
      * @return PushTokenCollection
      */
-    public function getPushTokens(): PushTokenCollection
+    public function getTokens(): PushTokenCollection
     {
         $extractPushTokens = fn(array $carry, PushMessage $message) => array_merge($carry,
             $message->to instanceof PushToken ? [$message->to] : $message->to->toArray()

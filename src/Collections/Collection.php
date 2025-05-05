@@ -39,6 +39,16 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     // Helpers ----
 
     /**
+     * Get the size of this collection
+     *
+     * @return int
+     */
+    public function count(): int
+    {
+        return count($this->items);
+    }
+
+    /**
      * Check if this collection contains a given value
      *
      * @param TValue $value
@@ -63,13 +73,15 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     }
 
     /**
-     * Get the size of this collection
+     * Add an item to this collection
      *
-     * @return int
+     * @param TValue $item
+     *
+     * @return void
      */
-    public function count(): int
+    public function add(mixed $item): void
     {
-        return count($this->items);
+        $this->items[] = $item;
     }
 
     /**

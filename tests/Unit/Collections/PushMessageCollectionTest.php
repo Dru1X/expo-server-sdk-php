@@ -113,7 +113,7 @@ class PushMessageCollectionTest extends TestCase
             ), title: 'Test Notification 6'),
         );
 
-        $tokens = $collection->getPushTokens();
+        $tokens = $collection->getTokens();
 
         $this->assertCount(11, $tokens);
 

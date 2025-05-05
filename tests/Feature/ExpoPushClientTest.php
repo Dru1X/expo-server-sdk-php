@@ -60,17 +60,20 @@ class ExpoPushClientTest extends TestCase
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification'),
         );
 
-        $tickets = $this->expoPush->sendNotifications($messages);
+        $result = $this->expoPush->sendNotifications($messages);
 
         $this->mockClient->assertSentCount(1, SendNotificationsRequest::class);
 
-        $this->assertCount(3, $tickets);
+        $this->assertCount(3, $result->tokenTickets);
+        $this->assertCount(3, $result->getTickets());
+        $this->assertFalse($result->hasErrors());
 
-        foreach ($tickets as $index => $ticket) {
+        foreach ($result->tokenTickets as $index => $ticket) {
             $this->assertEquals(PushStatus::Ok, $ticket->status);
             $this->assertEquals($responseBody['data'][$index]['id'], $ticket->receiptId);
             $this->assertEmpty($ticket->message);
             $this->assertEmpty($ticket->details);
+            $this->assertEquals($messages->get($index)->to, $result->getToken($ticket));
         }
     }
 
@@ -96,11 +99,12 @@ class ExpoPushClientTest extends TestCase
             );
         }
 
-        $tickets = $this->expoPush->sendNotifications($messages);
+        $result = $this->expoPush->sendNotifications($messages);
 
         $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
 
-        $this->assertCount(1000, $tickets);
+        $this->assertCount(1000, $result->tokenTickets);
+        $this->assertCount(1000, $result->getTickets());
     }
 
     #[Test]
@@ -127,17 +131,20 @@ class ExpoPushClientTest extends TestCase
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification'),
         ];
 
-        $tickets = $this->expoPush->sendNotifications($messages);
+        $result = $this->expoPush->sendNotifications($messages);
 
         $this->mockClient->assertSentCount(1, SendNotificationsRequest::class);
 
-        $this->assertCount(3, $tickets);
+        $this->assertCount(3, $result->tokenTickets);
+        $this->assertCount(3, $result->getTickets());
+        $this->assertFalse($result->hasErrors());
 
-        foreach ($tickets as $index => $ticket) {
+        foreach ($result->tokenTickets as $index => $ticket) {
             $this->assertEquals(PushStatus::Ok, $ticket->status);
             $this->assertEquals($responseData['data'][$index]['id'], $ticket->receiptId);
             $this->assertEmpty($ticket->message);
             $this->assertEmpty($ticket->details);
+            $this->assertEquals($messages[$index]->to, $result->getToken($ticket));
         }
     }
 
@@ -163,11 +170,12 @@ class ExpoPushClientTest extends TestCase
             );
         }
 
-        $tickets = $this->expoPush->sendNotifications($messages);
+        $result = $this->expoPush->sendNotifications($messages);
 
         $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
 
-        $this->assertCount(1000, $tickets);
+        $this->assertCount(1000, $result->tokenTickets);
+        $this->assertCount(1000, $result->getTickets());
     }
 
     #[Test]

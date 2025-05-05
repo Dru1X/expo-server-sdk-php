@@ -2,11 +2,16 @@
 
 namespace Dru1x\ExpoPush;
 
+use Dru1x\ExpoPush\Collections\RequestErrorCollection;
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
+use Dru1x\ExpoPush\Data\RequestError;
+use Dru1x\ExpoPush\Data\NotificationDispatch;
 use Dru1x\ExpoPush\Data\PushMessage;
+use Dru1x\ExpoPush\Enums\RequestErrorCode;
+use Dru1x\ExpoPush\Maps\PushTicketMap;
 use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
 use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
 use Generator;
@@ -37,10 +42,10 @@ class ExpoPushClient extends Connector
      *
      * @param PushMessageCollection|PushMessage[] $pushMessages
      *
-     * @return PushTicketCollection
+     * @return NotificationDispatch
      * @throws InvalidPoolItemException
      */
-    public function sendNotifications(PushMessageCollection|array $pushMessages): PushTicketCollection
+    public function sendNotifications(PushMessageCollection|array $pushMessages): NotificationDispatch
     {
         // Ensure push messages are in a collection
         if (is_array($pushMessages)) {
@@ -59,19 +64,52 @@ class ExpoPushClient extends Connector
             }
         });
 
-        // Keep chunks in request order
-        $pushTicketChunks = [];
+        // Extract a flat collection of tokens from the push message collection
+        $tokens = $pushMessages->getTokens();
 
-        // When a response is received, extract the push ticket collection and add it to the chunk list
-        $pool->withResponseHandler(function (Response $response, int $key) use (&$pushTicketChunks): void {
-            $pushTicketChunks[$key] = $response->dtoOrFail();
+        // Prepare a map and a collection for ticket/token pairs and errors, respectively
+        $ticketMap = new PushTicketMap();
+        $errors    = new RequestErrorCollection();
+
+        // When a response is received...
+        $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($tokens, $ticketMap): void {
+            /** @var PushTicketCollection $tickets */
+            $tickets = $response->dtoOrFail();
+            $offset  = $requestIndex * SendNotificationsRequest::MAX_NOTIFICATION_COUNT;
+
+            foreach ($tickets as $index => $ticket) {
+                $ticketMap->add($ticket, $tokens->get($index + $offset));
+            }
+        });
+
+        // When a request error occurs...
+        $pool->withExceptionHandler(function (FatalRequestException|RequestException $exception, int $requestIndex) use ($errors): void {
+
+            if ($exception instanceof FatalRequestException) {
+                $errors->add(new RequestError(
+                    code: RequestErrorCode::Failed,
+                    message: $exception->getMessage(),
+                    index: $requestIndex
+                ));
+                return;
+            }
+
+            $response = $exception->getResponse();
+
+            foreach($response->json('errors') as $responseError) {
+                $errors->add(new RequestError(
+                    code: RequestErrorCode::tryFrom($responseError['code']) ?? RequestErrorCode::Unknown,
+                    message: $responseError['message'] ?? 'Unknown error',
+                    index: $requestIndex
+                ));
+            }
         });
 
         // Send all the requests
         $pool->send()->wait();
 
         // Merge all the chunks of push tickets into a single ordered collection and return
-        return new PushTicketCollection()->merge(...$pushTicketChunks);
+        return new NotificationDispatch($ticketMap, $errors);
     }
 
     /**
