@@ -9,6 +9,7 @@ readonly class RequestError
     public function __construct(
         public RequestErrorCode $code,
         public string           $message,
+        public array            $details = [],
         public int|string|null  $index = null,
     ) {}
 }

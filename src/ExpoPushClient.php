@@ -100,6 +100,7 @@ class ExpoPushClient extends Connector
                 $errors->add(new RequestError(
                     code: RequestErrorCode::tryFrom($responseError['code']) ?? RequestErrorCode::Unknown,
                     message: $responseError['message'] ?? 'Unknown error',
+                    details: $responseError['details'] ?? [],
                     index: $requestIndex
                 ));
             }
