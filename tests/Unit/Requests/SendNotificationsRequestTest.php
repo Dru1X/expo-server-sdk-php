@@ -84,7 +84,7 @@ class SendNotificationsRequestTest extends TestCase
     #[Test]
     public function body_throws_exception_when_any_push_message_data_is_too_large(): void
     {
-        $contentBytes = SendNotificationsRequest::MAX_MESSAGE_DATA_BYTES + 1;
+        $contentBytes = SendNotificationsRequest::MAX_MESSAGE_DATA_BYTES + 2;
         $content      = bin2hex(random_bytes($contentBytes / 2));
 
         $messages = new PushMessageCollection(
