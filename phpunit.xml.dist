@@ -2,7 +2,7 @@
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-        bootstrap="tests/bootstrap.php"
+        bootstrap="vendor/autoload.php"
         colors="true"
         executionOrder="random"
         failOnWarning="true"
@@ -11,10 +11,10 @@
         beStrictAboutOutputDuringTests="true"
 >
     <testsuites>
-        <testsuite name="Feature Tests">
+        <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
-        <testsuite name="Unit Tests">
+        <testsuite name="Unit">
             <directory>tests/Unit</directory>
         </testsuite>
     </testsuites>
