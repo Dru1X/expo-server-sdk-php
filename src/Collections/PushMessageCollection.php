@@ -11,7 +11,7 @@ use ValueError;
  *
  * @extends Collection<array-key, PushMessage>
  */
-class PushMessageCollection extends Collection
+final class PushMessageCollection extends Collection
 {
     public function __construct(PushMessage ...$pushMessages)
     {

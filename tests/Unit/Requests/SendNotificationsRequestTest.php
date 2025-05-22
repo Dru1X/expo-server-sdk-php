@@ -5,8 +5,10 @@
 namespace Dru1x\ExpoPush\Tests\Unit\Requests;
 
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
+use Dru1x\ExpoPush\Data\FailedPushTicket;
 use Dru1x\ExpoPush\Data\PushMessage;
 use Dru1x\ExpoPush\Data\PushToken;
+use Dru1x\ExpoPush\Data\SuccessfulPushTicket;
 use Dru1x\ExpoPush\ExpoPushClient;
 use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
 use InvalidArgumentException;
@@ -114,16 +116,33 @@ class SendNotificationsRequestTest extends TestCase
     public function create_dto_from_response_returns_push_ticket_collection(): void
     {
         $request = new SendNotificationsRequest(
-            new PushMessageCollection()
+            new PushMessageCollection(
+                new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]')),
+                new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]')),
+                new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]')),
+            )
         );
 
         $this->mockClient->addResponses([
             SendNotificationsRequest::class => MockResponse::make(
                 body: [
                     'data' => [
-                        ['status' => 'ok', 'id' => 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'],
-                        ['status' => 'ok', 'id' => 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'],
-                        ['status' => 'ok', 'id' => 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'],
+                        [
+                            'status' => 'ok',
+                            'id'     => 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+                        ],
+                        [
+                            'status' => 'ok',
+                            'id'     => 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+                        ],
+                        [
+                            'status'  => 'error',
+                            'message' => '"ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]" is not a registered push notification recipient',
+                            'details' => [
+                                'error'         => 'DeviceNotRegistered',
+                                'expoPushToken' => 'ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]',
+                            ],
+                        ],
                     ],
                 ],
                 headers: ['Content-Type' => 'application/json']
@@ -135,9 +154,17 @@ class SendNotificationsRequestTest extends TestCase
         );
 
         $this->assertCount(3, $dto);
-        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $dto->get(0)->receiptId);
-        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $dto->get(1)->receiptId);
-        $this->assertEquals('ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', $dto->get(2)->receiptId);
+
+        $ticket1 = $dto->get(0);
+        $this->assertInstanceOf(SuccessfulPushTicket::class, $ticket1);
+        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $ticket1->receiptId);
+
+        $ticket2 = $dto->get(1);
+        $this->assertInstanceOf(SuccessfulPushTicket::class, $ticket2);
+        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $ticket2->receiptId);
+
+        $ticket3 = $dto->get(2);
+        $this->assertInstanceOf(FailedPushTicket::class, $ticket3);
     }
 
     #[Test]

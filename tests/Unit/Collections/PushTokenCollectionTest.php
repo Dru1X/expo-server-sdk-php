@@ -11,6 +11,48 @@ use PHPUnit\Framework\TestCase;
 class PushTokenCollectionTest extends TestCase
 {
     #[Test]
+    public function add_appends_token_to_collection(): void
+    {
+        $collection = new PushTokenCollection(
+            new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+        );
+
+        $collection->add(
+            new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]')
+        );
+
+        $this->assertCount(2, $collection);
+
+        $this->assertEquals('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $collection->get(0)->toString());
+        $this->assertEquals('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]', $collection->get(1)->toString());
+    }
+
+    #[Test]
+    public function set_inserts_token_to_collection_at_index(): void
+    {
+        $collection = new PushTokenCollection();
+
+        $collection->set(9, new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'));
+
+        $this->assertCount(1, $collection);
+        $this->assertNull($collection->get(0));
+        $this->assertEquals('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $collection->get(9)->toString());
+    }
+
+    #[Test]
+    public function set_replaces_token_in_collection_at_index(): void
+    {
+        $collection = new PushTokenCollection(
+            new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+        );
+
+        $collection->set(0, new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'));
+
+        $this->assertCount(1, $collection);
+        $this->assertEquals('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]', $collection->get(0)->toString());
+    }
+
+    #[Test]
     public function collection_is_iterable(): void
     {
         $collection = new PushTokenCollection(
@@ -136,10 +178,15 @@ class PushTokenCollectionTest extends TestCase
             new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
         );
 
-        $this->assertJsonStringEqualsJsonString(
-            '["ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]", "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]"]',
-            json_encode($collection),
-        );
+        $expectedJson = <<<JSON
+[
+  "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+  "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
+  "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]"
+]
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($collection));
     }
 
     #[Test]
@@ -151,9 +198,14 @@ class PushTokenCollectionTest extends TestCase
             new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
         );
 
-        $this->assertJsonStringEqualsJsonString(
-            '["ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]", "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]"]',
-            $collection->toJson(),
-        );
+        $expectedJson = <<<JSON
+[
+  "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+  "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
+  "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]"
+]
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
     }
 }

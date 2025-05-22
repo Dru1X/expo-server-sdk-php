@@ -6,7 +6,7 @@ use Dru1x\ExpoPush\Enums\PushStatus;
 use Dru1x\ExpoPush\Traits\ConvertsToJson;
 use JsonSerializable;
 
-readonly class PushReceipt implements JsonSerializable
+final readonly class PushReceipt implements JsonSerializable
 {
     use ConvertsToJson;
 

@@ -13,6 +13,69 @@ use ValueError;
 class PushMessageCollectionTest extends TestCase
 {
     #[Test]
+    public function add_appends_message_to_collection(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(
+                to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                title: 'Test Notification 1'
+            )
+        );
+
+        $collection->add(new PushMessage(
+            to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+            title: 'Test Notification 2'
+        ));
+
+        $this->assertCount(2, $collection);
+
+        $this->assertEquals('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $collection->get(0)->to->toString());
+        $this->assertEquals('Test Notification 1', $collection->get(0)->title);
+
+        $this->assertEquals('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]', $collection->get(1)->to->toString());
+        $this->assertEquals('Test Notification 2', $collection->get(1)->title);
+    }
+
+    #[Test]
+    public function set_inserts_message_to_collection_at_index(): void
+    {
+        $collection = new PushMessageCollection();
+
+        $collection->set(9, new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            title: 'Test Notification 9'
+        ));
+
+        $this->assertCount(1, $collection);
+
+        $this->assertNull($collection->get(0));
+
+        $this->assertEquals('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $collection->get(9)->to->toString());
+        $this->assertEquals('Test Notification 9', $collection->get(9)->title);
+    }
+
+    #[Test]
+    public function set_replaces_message_in_collection_at_index(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(
+                to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                title: 'Test Notification 1'
+            )
+        );
+
+        $collection->set(0, new PushMessage(
+            to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+            title: 'Test Notification 2'
+        ));
+
+        $this->assertCount(1, $collection);
+
+        $this->assertEquals('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]', $collection->get(0)->to->toString());
+        $this->assertEquals('Test Notification 2', $collection->get(0)->title);
+    }
+
+    #[Test]
     public function notification_count_correctly_counts_resultant_notifications(): void
     {
         $collection = new PushMessageCollection(
@@ -255,10 +318,24 @@ class PushMessageCollectionTest extends TestCase
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
         );
 
-        $this->assertJsonStringEqualsJsonString(
-            '[{"to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", "title": "Test Notification 1"}, {"to": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]", "title": "Test Notification 2"}, {"to": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]", "title": "Test Notification 3"}]',
-            json_encode($collection),
-        );
+        $expectedJson = <<<JSON
+[
+  {
+    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+    "title": "Test Notification 1"
+  },
+  {
+    "to": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
+    "title": "Test Notification 2"
+  },
+  {
+    "to": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]",
+    "title": "Test Notification 3"
+  }
+]
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($collection));
     }
 
     #[Test]
@@ -270,9 +347,23 @@ class PushMessageCollectionTest extends TestCase
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
         );
 
-        $this->assertJsonStringEqualsJsonString(
-            '[{"to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", "title": "Test Notification 1"}, {"to": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]", "title": "Test Notification 2"}, {"to": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]", "title": "Test Notification 3"}]',
-            $collection->toJson(),
-        );
+        $expectedJson = <<<JSON
+[
+  {
+    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+    "title": "Test Notification 1"
+  },
+  {
+    "to": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
+    "title": "Test Notification 2"
+  },
+  {
+    "to": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]",
+    "title": "Test Notification 3"
+  }
+]
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
     }
 }

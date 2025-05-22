@@ -8,7 +8,7 @@ use Dru1x\ExpoPush\Enums\Priority;
 use Dru1x\ExpoPush\Traits\ConvertsToJson;
 use JsonSerializable;
 
-readonly class PushMessage implements JsonSerializable
+final readonly class PushMessage implements JsonSerializable
 {
     use ConvertsToJson;
 

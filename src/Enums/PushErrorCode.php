@@ -2,7 +2,7 @@
 
 namespace Dru1x\ExpoPush\Enums;
 
-enum RequestErrorCode: string
+enum PushErrorCode: string
 {
     case Unknown = 'UNKNOWN';
     case Failed = 'FAILED';

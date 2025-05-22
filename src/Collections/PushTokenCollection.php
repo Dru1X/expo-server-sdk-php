@@ -9,7 +9,7 @@ use Dru1x\ExpoPush\Data\PushToken;
  *
  * @extends Collection<array-key, PushToken>
  */
-class PushTokenCollection extends Collection
+final class PushTokenCollection extends Collection
 {
     public function __construct(PushToken ...$pushToken)
     {

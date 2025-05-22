@@ -6,8 +6,11 @@ namespace Dru1x\ExpoPush\Tests\Feature;
 
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
+use Dru1x\ExpoPush\Data\PushTicket;
+use Dru1x\ExpoPush\Data\SuccessfulPushTicket;
 use Dru1x\ExpoPush\Data\PushMessage;
 use Dru1x\ExpoPush\Data\PushToken;
+use Dru1x\ExpoPush\Enums\PushErrorCode;
 use Dru1x\ExpoPush\Enums\PushStatus;
 use Dru1x\ExpoPush\ExpoPushClient;
 use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
@@ -64,16 +67,13 @@ class ExpoPushClientTest extends TestCase
 
         $this->mockClient->assertSentCount(1, SendNotificationsRequest::class);
 
-        $this->assertCount(3, $result->tokenTickets);
-        $this->assertCount(3, $result->getTickets());
+        $this->assertCount(3, $result->tickets);
         $this->assertFalse($result->hasErrors());
 
-        foreach ($result->tokenTickets as $index => $ticket) {
+        foreach ($result->tickets as $index => $ticket) {
+            $this->assertInstanceOf(SuccessfulPushTicket::class, $ticket);
             $this->assertEquals(PushStatus::Ok, $ticket->status);
             $this->assertEquals($responseBody['data'][$index]['id'], $ticket->receiptId);
-            $this->assertEmpty($ticket->message);
-            $this->assertEmpty($ticket->details);
-            $this->assertEquals($messages->get($index)->to, $result->getToken($ticket));
         }
     }
 
@@ -103,8 +103,7 @@ class ExpoPushClientTest extends TestCase
 
         $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
 
-        $this->assertCount(1000, $result->tokenTickets);
-        $this->assertCount(1000, $result->getTickets());
+        $this->assertCount(1000, $result->tickets);
     }
 
     #[Test]
@@ -135,16 +134,13 @@ class ExpoPushClientTest extends TestCase
 
         $this->mockClient->assertSentCount(1, SendNotificationsRequest::class);
 
-        $this->assertCount(3, $result->tokenTickets);
-        $this->assertCount(3, $result->getTickets());
+        $this->assertCount(3, $result->tickets);
         $this->assertFalse($result->hasErrors());
 
-        foreach ($result->tokenTickets as $index => $ticket) {
+        foreach ($result->tickets as $index => $ticket) {
+            $this->assertInstanceOf(SuccessfulPushTicket::class, $ticket);
             $this->assertEquals(PushStatus::Ok, $ticket->status);
             $this->assertEquals($responseData['data'][$index]['id'], $ticket->receiptId);
-            $this->assertEmpty($ticket->message);
-            $this->assertEmpty($ticket->details);
-            $this->assertEquals($messages[$index]->to, $result->getToken($ticket));
         }
     }
 
@@ -174,8 +170,114 @@ class ExpoPushClientTest extends TestCase
 
         $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
 
-        $this->assertCount(1000, $result->tokenTickets);
-        $this->assertCount(1000, $result->getTickets());
+        $this->assertCount(1000, $result->tickets);
+    }
+
+    #[Test]
+    public function send_notifications_leaves_index_gaps_for_request_errors(): void
+    {
+        $messages = $this->generatePushMessages(1000);
+
+        foreach ($messages->chunk(100) as $index => $messageChunk) {
+
+            if ($index === 5) {
+                $this->mockClient->addResponse(
+                    MockResponse::make(
+                        body: [
+                            'errors' => [
+                                [
+                                    'code'    => 'PUSH_TOO_MANY_EXPERIENCE_IDS',
+                                    'message' => 'You are trying to send push notifications to different Expo experiences',
+                                ],
+                            ],
+                        ],
+                        status: 400,
+                        headers: ['Content-Type' => 'application/json']
+                    )
+                );
+
+                continue;
+            }
+
+            $responseBody = [
+                'data' => array_map(fn(PushMessage $message) => [
+                    'status' => 'ok',
+                    'id'     => $this->generatePushReceiptId(),
+                ], $messageChunk->toArray()),
+            ];
+
+            $this->mockClient->addResponse(
+                MockResponse::make(
+                    body: $responseBody,
+                    headers: ['Content-Type' => 'application/json']
+                )
+            );
+        }
+
+        $result = $this->expoPush->sendNotifications($messages);
+
+        $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
+
+        $this->assertCount(900, $result->tickets);
+
+        $this->assertInstanceOf(PushTicket::class, $result->tickets->get(499));
+        $this->assertNull($result->tickets->get(500));
+        $this->assertNull($result->tickets->get(599));
+        $this->assertInstanceOf(PushTicket::class, $result->tickets->get(600));
+
+        $this->assertTrue($result->hasErrors());
+        $this->assertCount(1, $result->errors);
+        $this->assertEquals(PushErrorCode::PushTooManyExperienceIds, $result->errors->get(0)->code);
+    }
+
+    #[Test]
+    public function send_notifications_exposes_push_errors_for_each_request_error(): void
+    {
+        $messages = $this->generatePushMessages(1000);
+
+        foreach ($messages->chunk(100) as $index => $messageChunk) {
+
+            if ($index === 5) {
+                $this->mockClient->addResponse(
+                    MockResponse::make(
+                        body: [
+                            'errors' => [
+                                [
+                                    'code'    => 'PUSH_TOO_MANY_EXPERIENCE_IDS',
+                                    'message' => 'You are trying to send push notifications to different Expo experiences',
+                                ],
+                            ],
+                        ],
+                        status: 400,
+                        headers: ['Content-Type' => 'application/json']
+                    )
+                );
+
+                continue;
+            }
+
+            $responseBody = [
+                'data' => array_map(fn(PushMessage $message) => [
+                    'status' => 'ok',
+                    'id'     => $this->generatePushReceiptId(),
+                ], $messageChunk->toArray()),
+            ];
+
+            $this->mockClient->addResponse(
+                MockResponse::make(
+                    body: $responseBody,
+                    headers: ['Content-Type' => 'application/json']
+                )
+            );
+        }
+
+        $result = $this->expoPush->sendNotifications($messages);
+
+        $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
+
+        $this->assertTrue($result->hasErrors());
+        $this->assertCount(1, $result->errors);
+        $this->assertEquals(PushErrorCode::PushTooManyExperienceIds, $result->errors->get(0)->code);
     }
 
     #[Test]

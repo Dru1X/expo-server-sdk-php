@@ -13,7 +13,13 @@ class RichContentTest extends TestCase
     {
         $richContent = new RichContent('https://file.cloud/abc-123');
 
-        $this->assertJsonStringEqualsJsonString('{"image": "https://file.cloud/abc-123"}', json_encode($richContent));
+        $expectedJson = <<<JSON
+{
+  "image": "https://file.cloud/abc-123"
+}
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($richContent));
     }
 
     #[Test]
@@ -21,6 +27,12 @@ class RichContentTest extends TestCase
     {
         $richContent = new RichContent('https://file.cloud/abc-123');
 
-        $this->assertJsonStringEqualsJsonString('{"image": "https://file.cloud/abc-123"}', $richContent->toJson());
+        $expectedJson = <<<JSON
+{
+  "image": "https://file.cloud/abc-123"
+}
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, $richContent->toJson());
     }
 }

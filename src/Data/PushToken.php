@@ -7,7 +7,7 @@ use InvalidArgumentException;
 use JsonSerializable;
 use Stringable;
 
-readonly class PushToken implements JsonSerializable, Stringable
+final readonly class PushToken implements JsonSerializable, Stringable
 {
     use ConvertsToJson;
 

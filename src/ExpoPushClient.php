@@ -2,16 +2,14 @@
 
 namespace Dru1x\ExpoPush;
 
-use Dru1x\ExpoPush\Collections\RequestErrorCollection;
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
-use Dru1x\ExpoPush\Data\RequestError;
-use Dru1x\ExpoPush\Data\NotificationDispatch;
+use Dru1x\ExpoPush\Collections\PushErrorCollection;
+use Dru1x\ExpoPush\Data\PushResult;
 use Dru1x\ExpoPush\Data\PushMessage;
-use Dru1x\ExpoPush\Enums\RequestErrorCode;
-use Dru1x\ExpoPush\Maps\PushTicketMap;
+use Dru1x\ExpoPush\Exception\RequestExceptionHandler;
 use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
 use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
 use Generator;
@@ -22,7 +20,7 @@ use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\Connector;
 use Saloon\Http\Response;
 
-class ExpoPushClient extends Connector
+final class ExpoPushClient extends Connector
 {
     public const int MAX_CONCURRENT_REQUESTS = 6;
 
@@ -42,10 +40,10 @@ class ExpoPushClient extends Connector
      *
      * @param PushMessageCollection|PushMessage[] $pushMessages
      *
-     * @return NotificationDispatch
+     * @return PushResult
      * @throws InvalidPoolItemException
      */
-    public function sendNotifications(PushMessageCollection|array $pushMessages): NotificationDispatch
+    public function sendNotifications(PushMessageCollection|array $pushMessages): PushResult
     {
         // Ensure push messages are in a collection
         if (is_array($pushMessages)) {
@@ -64,53 +62,29 @@ class ExpoPushClient extends Connector
             }
         });
 
-        // Extract a flat collection of tokens from the push message collection
-        $tokens = $pushMessages->getTokens();
-
-        // Prepare a map and a collection for ticket/token pairs and errors, respectively
-        $ticketMap = new PushTicketMap();
-        $errors    = new RequestErrorCollection();
+        // Prepare ticket and error collections
+        $tickets = new PushTicketCollection();
+        $errors  = new PushErrorCollection();
 
         // When a response is received...
-        $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($tokens, $ticketMap): void {
-            /** @var PushTicketCollection $tickets */
-            $tickets = $response->dtoOrFail();
-            $offset  = $requestIndex * SendNotificationsRequest::MAX_NOTIFICATION_COUNT;
+        $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($tickets): void {
+            /** @var PushTicketCollection $ticketBatch */
+            $ticketBatch = $response->dtoOrFail();
+            $offset      = $requestIndex * SendNotificationsRequest::MAX_NOTIFICATION_COUNT;
 
-            foreach ($tickets as $index => $ticket) {
-                $ticketMap->add($ticket, $tokens->get($index + $offset));
+            foreach ($ticketBatch as $index => $ticket) {
+                $tickets->set($offset + $index, $ticket);
             }
         });
 
         // When a request error occurs...
-        $pool->withExceptionHandler(function (FatalRequestException|RequestException $exception, int $requestIndex) use ($errors): void {
-
-            if ($exception instanceof FatalRequestException) {
-                $errors->add(new RequestError(
-                    code: RequestErrorCode::Failed,
-                    message: $exception->getMessage(),
-                    index: $requestIndex
-                ));
-                return;
-            }
-
-            $response = $exception->getResponse();
-
-            foreach($response->json('errors') as $responseError) {
-                $errors->add(new RequestError(
-                    code: RequestErrorCode::tryFrom($responseError['code']) ?? RequestErrorCode::Unknown,
-                    message: $responseError['message'] ?? 'Unknown error',
-                    details: $responseError['details'] ?? [],
-                    index: $requestIndex
-                ));
-            }
-        });
+        $pool->withExceptionHandler(new RequestExceptionHandler(SendNotificationsRequest::MAX_NOTIFICATION_COUNT, $errors));
 
         // Send all the requests
         $pool->send()->wait();
 
         // Merge all the chunks of push tickets into a single ordered collection and return
-        return new NotificationDispatch($ticketMap, $errors);
+        return new PushResult($tickets, $errors);
     }
 
     /**

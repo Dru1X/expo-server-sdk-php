@@ -18,7 +18,7 @@ use Saloon\Traits\Body\HasJsonBody;
 use Saloon\Traits\Plugins\AcceptsJson;
 use UnexpectedValueException;
 
-class GetReceiptsRequest extends Request implements HasBody
+final class GetReceiptsRequest extends Request implements HasBody
 {
     use AcceptsJson, HasJsonBody, CompressesBody;
 

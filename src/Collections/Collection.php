@@ -85,6 +85,20 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     }
 
     /**
+     * Upsert an item to this collection at a specific index
+     *
+     * @param int   $index
+     * @param mixed $item
+     *
+     * @return void
+     */
+    public function set(int $index, mixed $item): void
+    {
+        $this->items[$index] = $item;
+
+    }
+
+    /**
      * Break this collection into a set of smaller chunks
      *
      * @param int $size
