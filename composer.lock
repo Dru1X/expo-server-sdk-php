@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e9dfa3c24d227282e1818790becfd03c",
+    "content-hash": "e5f8da83b935be65beb2d9b45f6ab0dc",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -537,16 +537,16 @@
         },
         {
             "name": "saloonphp/saloon",
-            "version": "v3.13.0",
+            "version": "v3.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/saloonphp/saloon.git",
-                "reference": "87bde73866e9c1814a8a8fac2dd0fbfd414ec1dd"
+                "reference": "de1e0beae1c9720b353688f5bf6eb532cdbf882b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/saloonphp/saloon/zipball/87bde73866e9c1814a8a8fac2dd0fbfd414ec1dd",
-                "reference": "87bde73866e9c1814a8a8fac2dd0fbfd414ec1dd",
+                "url": "https://api.github.com/repos/saloonphp/saloon/zipball/de1e0beae1c9720b353688f5bf6eb532cdbf882b",
+                "reference": "de1e0beae1c9720b353688f5bf6eb532cdbf882b",
                 "shasum": ""
             },
             "require": {
@@ -565,8 +565,8 @@
                 "friendsofphp/php-cs-fixer": "^3.5",
                 "illuminate/collections": "^9.39 || ^10.0",
                 "league/flysystem": "^3.0",
-                "pestphp/pest": "^2.36.0 || ^3.8.2",
-                "phpstan/phpstan": "^2.1.13",
+                "pestphp/pest": "^2.10",
+                "phpstan/phpstan": "^1.11.4",
                 "saloonphp/xml-wrangler": "^1.1",
                 "spatie/ray": "^1.33",
                 "symfony/dom-crawler": "^6.0 || ^7.0",
@@ -606,7 +606,7 @@
             ],
             "support": {
                 "issues": "https://github.com/saloonphp/saloon/issues",
-                "source": "https://github.com/saloonphp/saloon/tree/v3.13.0"
+                "source": "https://github.com/saloonphp/saloon/tree/v3.11.0"
             },
             "funding": [
                 {
@@ -614,7 +614,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-05-02T17:20:03+00:00"
+            "time": "2025-02-02T14:48:09+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
