@@ -1,21 +1,21 @@
 <?php
 
-namespace Data;
+namespace Dru1x\ExpoPush\Tests\Unit\Results;
 
 use Dru1x\ExpoPush\Collections\PushErrorCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
 use Dru1x\ExpoPush\Data\PushError;
-use Dru1x\ExpoPush\Data\PushResult;
 use Dru1x\ExpoPush\Enums\PushErrorCode;
+use Dru1x\ExpoPush\Results\SendNotificationsResult;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class PushResultTest extends TestCase
+class SendNotificationsResultTest extends TestCase
 {
     #[Test]
     public function has_errors_returns_true_when_errors_are_present(): void
     {
-        $result = new PushResult(
+        $result = new SendNotificationsResult(
             tickets: new PushTicketCollection(),
             errors: new PushErrorCollection(
                 new PushError(
@@ -31,7 +31,7 @@ class PushResultTest extends TestCase
     #[Test]
     public function has_errors_returns_false_when_error_collection_is_empty(): void
     {
-        $result = new PushResult(
+        $result = new SendNotificationsResult(
             tickets: new PushTicketCollection(),
             errors: new PushErrorCollection(),
         );
@@ -42,7 +42,7 @@ class PushResultTest extends TestCase
     #[Test]
     public function has_errors_returns_false_when_error_collection_is_missing(): void
     {
-        $result = new PushResult(
+        $result = new SendNotificationsResult(
             tickets: new PushTicketCollection(),
             errors: null
         );

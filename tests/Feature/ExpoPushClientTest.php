@@ -6,6 +6,7 @@ namespace Dru1x\ExpoPush\Tests\Feature;
 
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
+use Dru1x\ExpoPush\Data\PushReceipt;
 use Dru1x\ExpoPush\Data\PushTicket;
 use Dru1x\ExpoPush\Data\SuccessfulPushTicket;
 use Dru1x\ExpoPush\Data\PushMessage;
@@ -20,7 +21,6 @@ use PHPUnit\Framework\TestCase;
 use Saloon\Config;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
-use Saloon\Http\PendingRequest;
 
 class ExpoPushClientTest extends TestCase
 {
@@ -304,17 +304,15 @@ class ExpoPushClientTest extends TestCase
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         );
 
-        $receipts = $this->expoPush->getReceipts($receiptIds);
+        $result = $this->expoPush->getReceipts($receiptIds);
 
         $this->mockClient->assertSentCount(1, GetReceiptsRequest::class);
 
-        $this->assertCount(3, $receipts);
+        $this->assertCount(3, $result->receipts);
 
-        foreach ($receipts as $receipt) {
+        foreach ($result->receipts as $receipt) {
             $this->assertEquals(PushStatus::Ok, $receipt->status);
             $this->assertTrue($receiptIds->contains($receipt->id));;
-            $this->assertEmpty($receipt->message);
-            $this->assertEmpty($receipt->details);
         }
     }
 
@@ -342,18 +340,123 @@ class ExpoPushClientTest extends TestCase
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         ];
 
-        $receipts = $this->expoPush->getReceipts($receiptIds);
+        $result = $this->expoPush->getReceipts($receiptIds);
 
         $this->mockClient->assertSentCount(1, GetReceiptsRequest::class);
 
-        $this->assertCount(3, $receipts);
+        $this->assertCount(3, $result->receipts);
 
-        foreach ($receipts as $receipt) {
+        foreach ($result->receipts as $receipt) {
             $this->assertEquals(PushStatus::Ok, $receipt->status);
             $this->assertTrue(in_array($receipt->id, $receiptIds));
-            $this->assertEmpty($receipt->message);
-            $this->assertEmpty($receipt->details);
         }
+    }
+
+    #[Test]
+    public function get_receipts_leaves_index_gaps_for_request_errors(): void
+    {
+        $receiptIds = $this->generatePushReceiptIds(10000);
+
+        foreach ($receiptIds->chunk(1000) as $index => $receiptIdChunk) {
+
+            if ($index === 5) {
+                $this->mockClient->addResponse(
+                    MockResponse::make(
+                        body: [
+                            'errors' => [
+                                [
+                                    'code'    => 'PUSH_TOO_MANY_RECEIPTS',
+                                    'message' => 'You are trying to get more than 1000 push receipts in one request',
+                                ],
+                            ],
+                        ],
+                        status: 400,
+                        headers: ['Content-Type' => 'application/json']
+                    )
+                );
+
+                continue;
+            }
+
+            $responseBody = [
+                'data' => array_combine(
+                    $receiptIdChunk->toArray(),
+                    array_fill(0, count($receiptIdChunk), ['status' => 'ok'])
+                ),
+            ];
+
+            $this->mockClient->addResponse(
+                MockResponse::make(
+                    body: $responseBody,
+                    headers: ['Content-Type' => 'application/json']
+                )
+            );
+        }
+
+        $result = $this->expoPush->getReceipts($receiptIds);
+
+        $this->mockClient->assertSentCount(10, GetReceiptsRequest::class);
+
+        $this->assertCount(9000, $result->receipts);
+
+        $this->assertInstanceOf(PushReceipt::class, $result->receipts->get(499));
+        $this->assertNull($result->receipts->get(5000));
+        $this->assertNull($result->receipts->get(5999));
+        $this->assertInstanceOf(PushReceipt::class, $result->receipts->get(600));
+
+        $this->assertTrue($result->hasErrors());
+        $this->assertCount(1, $result->errors);
+        $this->assertEquals(PushErrorCode::PushTooManyReceipts, $result->errors->get(0)->code);
+    }
+
+    #[Test]
+    public function get_receipts_exposes_push_errors_for_each_request_error(): void
+    {
+        $receiptIds = $this->generatePushReceiptIds(10000);
+
+        foreach ($receiptIds->chunk(1000) as $index => $receiptIdChunk) {
+
+            if ($index === 5) {
+                $this->mockClient->addResponse(
+                    MockResponse::make(
+                        body: [
+                            'errors' => [
+                                [
+                                    'code'    => 'PUSH_TOO_MANY_RECEIPTS',
+                                    'message' => 'You are trying to get more than 1000 push receipts in one request',
+                                ],
+                            ],
+                        ],
+                        status: 400,
+                        headers: ['Content-Type' => 'application/json']
+                    )
+                );
+
+                continue;
+            }
+
+            $responseBody = [
+                'data' => array_combine(
+                    $receiptIdChunk->toArray(),
+                    array_fill(0, count($receiptIdChunk), ['status' => 'ok'])
+                ),
+            ];
+
+            $this->mockClient->addResponse(
+                MockResponse::make(
+                    body: $responseBody,
+                    headers: ['Content-Type' => 'application/json']
+                )
+            );
+        }
+
+        $result = $this->expoPush->getReceipts($receiptIds);
+
+        $this->mockClient->assertSentCount(10, GetReceiptsRequest::class);
+
+        $this->assertTrue($result->hasErrors());
+        $this->assertCount(1, $result->errors);
+        $this->assertEquals(PushErrorCode::PushTooManyReceipts, $result->errors->get(0)->code);
     }
 
     #[Test]
@@ -383,6 +486,17 @@ class ExpoPushClientTest extends TestCase
         }
 
         return new PushMessageCollection(...$messages);
+    }
+
+    protected function generatePushReceiptIds(int $count): PushReceiptIdCollection
+    {
+        $receiptIds = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $receiptIds[] = $this->generatePushReceiptId();
+        }
+
+        return new PushReceiptIdCollection(...$receiptIds);
     }
 
     protected function generatePushReceiptId(): string

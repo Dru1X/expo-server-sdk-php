@@ -105,9 +105,20 @@ class GetReceiptsRequestTest extends TestCase
             GetReceiptsRequest::class => MockResponse::make(
                 body: [
                     'data' => [
-                        'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX' => ['status' => 'ok'],
-                        'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY' => ['status' => 'ok'],
-                        'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ' => ['status' => 'ok'],
+                        'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX' => [
+                            'status' => 'ok',
+                        ],
+                        'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY' => [
+                            'status' => 'ok',
+                        ],
+                        'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ' => [
+                            'status'  => 'error',
+                            'message' => '"ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]" is not a registered push notification recipient',
+                            'details' => [
+                                'error'         => 'DeviceNotRegistered',
+                                'expoPushToken' => 'ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]',
+                            ],
+                        ],
                     ],
                 ],
                 headers: ['Content-Type' => 'application/json']
@@ -139,34 +150,6 @@ class GetReceiptsRequestTest extends TestCase
         ]);
 
         $this->expectException(UnexpectedValueException::class);
-
-        $request->createDtoFromResponse(
-            $this->connector->send($request)
-        );
-    }
-
-    #[Test]
-    public function create_dto_from_response_throws_exception_for_error_response(): void
-    {
-        $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection()
-        );
-
-        $this->mockClient->addResponses([
-            GetReceiptsRequest::class => MockResponse::make(
-                body: [
-                    'errors' => [
-                        [
-                            "message" => "Too many receipts",
-                            "details" => [],
-                        ],
-                    ],
-                ],
-                headers: ['Content-Type' => 'application/json']
-            ),
-        ]);
-
-        $this->expectException(RuntimeException::class);
 
         $request->createDtoFromResponse(
             $this->connector->send($request)

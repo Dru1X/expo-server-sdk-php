@@ -143,6 +143,21 @@ class PushReceiptIdCollectionTest extends TestCase
     }
 
     #[Test]
+    public function values_returns_collection_with_consecutive_keys(): void
+    {
+        $collection = new PushReceiptIdCollection(
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+        );
+
+        $collection->set(9, 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ');;
+
+        $newCollection = $collection->values();
+
+        $this->assertIsList($newCollection->toArray());
+    }
+
+    #[Test]
     public function to_array_returns_push_receipt_id_array(): void
     {
         $collection = new PushReceiptIdCollection(

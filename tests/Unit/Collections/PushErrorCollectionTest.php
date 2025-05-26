@@ -156,6 +156,22 @@ class PushErrorCollectionTest extends TestCase
     }
 
     #[Test]
+    public function values_returns_collection_with_consecutive_keys(): void
+    {
+        $collection = new PushErrorCollection(
+            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
+            new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
+            new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
+        );
+
+        $collection->set(9, new PushError(code: PushErrorCode::PushTooManyNotifications, message: 'Too many notifications'));
+
+        $newCollection = $collection->values();
+
+        $this->assertIsList($newCollection->toArray());
+    }
+
+    #[Test]
     public function to_array_returns_push_message_array(): void
     {
         $collection = new PushErrorCollection(
