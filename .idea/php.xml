@@ -9,7 +9,7 @@
   </component>
   <component name="MessDetector">
     <phpmd_settings>
-      <phpmd_by_interpreter asDefaultInterpreter="true" interpreter_id="2d7b59db-ff15-4865-8d41-033112f3e9e3" timeout="30000" />
+      <phpmd_by_interpreter asDefaultInterpreter="true" interpreter_id="011373ef-1d37-4588-a073-a3a805ef9962" timeout="30000" />
     </phpmd_settings>
   </component>
   <component name="MessDetectorOptionsConfiguration">
