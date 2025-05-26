@@ -48,10 +48,15 @@ class PushMessageTest extends TestCase
             body: 'This is a test notification',
         );
 
-        $this->assertJsonStringEqualsJsonString(
-            '{"to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", "title": "Test Notification", "body": "This is a test notification"}',
-            json_encode($message),
-        );
+        $expectedJson = <<<JSON
+{
+    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
+    "title": "Test Notification", 
+    "body": "This is a test notification"
+}
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($message));
     }
 
     #[Test]
@@ -63,9 +68,14 @@ class PushMessageTest extends TestCase
             body: 'This is a test notification',
         );
 
-        $this->assertJsonStringEqualsJsonString(
-            '{"to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", "title": "Test Notification", "body": "This is a test notification"}',
-            $message->toJson(),
-        );
+        $expectedJson = <<<JSON
+{
+    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
+    "title": "Test Notification", 
+    "body": "This is a test notification"
+}
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, $message->toJson());
     }
 }

@@ -6,7 +6,10 @@ use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
+use Dru1x\ExpoPush\Collections\PushErrorCollection;
+use Dru1x\ExpoPush\Data\PushResult;
 use Dru1x\ExpoPush\Data\PushMessage;
+use Dru1x\ExpoPush\Exception\RequestExceptionHandler;
 use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
 use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
 use Generator;
@@ -17,7 +20,7 @@ use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\Connector;
 use Saloon\Http\Response;
 
-class ExpoPushClient extends Connector
+final class ExpoPushClient extends Connector
 {
     public const int MAX_CONCURRENT_REQUESTS = 6;
 
@@ -37,10 +40,10 @@ class ExpoPushClient extends Connector
      *
      * @param PushMessageCollection|PushMessage[] $pushMessages
      *
-     * @return PushTicketCollection
+     * @return PushResult
      * @throws InvalidPoolItemException
      */
-    public function sendNotifications(PushMessageCollection|array $pushMessages): PushTicketCollection
+    public function sendNotifications(PushMessageCollection|array $pushMessages): PushResult
     {
         // Ensure push messages are in a collection
         if (is_array($pushMessages)) {
@@ -59,19 +62,29 @@ class ExpoPushClient extends Connector
             }
         });
 
-        // Keep chunks in request order
-        $pushTicketChunks = [];
+        // Prepare ticket and error collections
+        $tickets = new PushTicketCollection();
+        $errors  = new PushErrorCollection();
 
-        // When a response is received, extract the push ticket collection and add it to the chunk list
-        $pool->withResponseHandler(function (Response $response, int $key) use (&$pushTicketChunks): void {
-            $pushTicketChunks[$key] = $response->dtoOrFail();
+        // When a response is received...
+        $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($tickets): void {
+            /** @var PushTicketCollection $ticketBatch */
+            $ticketBatch = $response->dtoOrFail();
+            $offset      = $requestIndex * SendNotificationsRequest::MAX_NOTIFICATION_COUNT;
+
+            foreach ($ticketBatch as $index => $ticket) {
+                $tickets->set($offset + $index, $ticket);
+            }
         });
+
+        // When a request error occurs...
+        $pool->withExceptionHandler(new RequestExceptionHandler(SendNotificationsRequest::MAX_NOTIFICATION_COUNT, $errors));
 
         // Send all the requests
         $pool->send()->wait();
 
         // Merge all the chunks of push tickets into a single ordered collection and return
-        return new PushTicketCollection()->merge(...$pushTicketChunks);
+        return new PushResult($tickets, $errors);
     }
 
     /**

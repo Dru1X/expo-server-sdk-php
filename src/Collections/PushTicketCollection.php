@@ -9,7 +9,7 @@ use Dru1x\ExpoPush\Data\PushTicket;
  *
  * @extends Collection<array-key, PushTicket>
  */
-class PushTicketCollection extends Collection
+final class PushTicketCollection extends Collection
 {
     public function __construct(PushTicket ...$pushTickets)
     {

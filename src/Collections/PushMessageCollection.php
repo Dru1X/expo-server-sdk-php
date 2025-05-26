@@ -11,7 +11,7 @@ use ValueError;
  *
  * @extends Collection<array-key, PushMessage>
  */
-class PushMessageCollection extends Collection
+final class PushMessageCollection extends Collection
 {
     public function __construct(PushMessage ...$pushMessages)
     {
@@ -113,7 +113,7 @@ class PushMessageCollection extends Collection
      *
      * @return PushTokenCollection
      */
-    public function getPushTokens(): PushTokenCollection
+    public function getTokens(): PushTokenCollection
     {
         $extractPushTokens = fn(array $carry, PushMessage $message) => array_merge($carry,
             $message->to instanceof PushToken ? [$message->to] : $message->to->toArray()

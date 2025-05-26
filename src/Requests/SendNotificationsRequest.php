@@ -4,8 +4,12 @@ namespace Dru1x\ExpoPush\Requests;
 
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
-use Dru1x\ExpoPush\Data\PushTicket;
+use Dru1x\ExpoPush\Data\FailedPushTicket;
+use Dru1x\ExpoPush\Data\PushToken;
+use Dru1x\ExpoPush\Data\SuccessfulPushTicket;
+use Dru1x\ExpoPush\Data\PushTicketDetails;
 use Dru1x\ExpoPush\Enums\PushStatus;
+use Dru1x\ExpoPush\Enums\PushTicketErrorCode;
 use Dru1x\ExpoPush\Traits\CompressesBody;
 use InvalidArgumentException;
 use JsonException;
@@ -19,7 +23,7 @@ use Saloon\Traits\Body\HasJsonBody;
 use Saloon\Traits\Plugins\AcceptsJson;
 use UnexpectedValueException;
 
-class SendNotificationsRequest extends Request implements HasBody
+final class SendNotificationsRequest extends Request implements HasBody
 {
     use AcceptsJson, HasJsonBody, CompressesBody;
 
@@ -41,25 +45,61 @@ class SendNotificationsRequest extends Request implements HasBody
             $errors = $response->json('errors');
             $data   = $response->json('data');
         } catch (JsonException $exception) {
+            // TODO: Throw custom exception here?
             throw new UnexpectedValueException(
                 message: "Response could not be decoded: {$exception->getMessage()}",
                 previous: $exception
             );
         }
 
+        // TODO: Throw custom exception here?
         if (!empty($errors)) {
             throw new RuntimeException(
                 message: "Request failed: " . $errors[0]['message'] ?? 'Unknown error'
             );
         }
 
-        return new PushTicketCollection(
-            ...array_map(fn(array $ticketData) => new PushTicket(
-                status: PushStatus::from($ticketData['status']),
-                receiptId: $ticketData['id'] ?? null,
-                message: $ticketData['message'] ?? null,
-                details: $ticketData['details'] ?? null,
-            ), $data)
+        $tokens  = $this->pushMessages->getTokens();
+        $tickets = new PushTicketCollection();
+
+        foreach ($data as $index => $ticketData) {
+
+            // Get the corresponding token and parse the ticket status
+            $token  = $tokens->get($index);
+            $status = PushStatus::from($ticketData['status']);
+
+            // Instantiate and add a ticket to the collection based on the status
+            $tickets->add(match ($status) {
+                PushStatus::Ok    => $this->makeSuccessfulPushTicket($token, $ticketData),
+                PushStatus::Error => $this->makeFailedPushTicket($token, $ticketData),
+            });
+        }
+
+        return $tickets;
+    }
+
+    // DTOs ----
+
+    protected function makeSuccessfulPushTicket(PushToken $token, array $data): SuccessfulPushTicket
+    {
+        return new SuccessfulPushTicket(
+            token: $token,
+            receiptId: $data['id'],
+        );
+    }
+
+    protected function makeFailedPushTicket(PushToken $token, array $data): FailedPushTicket
+    {
+        $detailsError = $data['details']['error'] ?? null;
+        $detailsToken = $data['details']['token'] ?? null;
+
+        return new FailedPushTicket(
+            token: $token,
+            message: $data['message'],
+            details: new PushTicketDetails(
+                error: PushTicketErrorCode::tryFrom($detailsError) ?? PushTicketErrorCode::Unknown,
+                expoPushToken: $detailsToken ? new PushToken($detailsToken) : null,
+            )
         );
     }
 

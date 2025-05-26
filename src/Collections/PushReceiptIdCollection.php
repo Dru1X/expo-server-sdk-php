@@ -7,7 +7,7 @@ namespace Dru1x\ExpoPush\Collections;
  *
  * @extends Collection<array-key, string>
  */
-class PushReceiptIdCollection extends Collection
+final class PushReceiptIdCollection extends Collection
 {
     public function __construct(string ...$pushReceiptId)
     {

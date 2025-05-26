@@ -9,7 +9,7 @@ use Dru1x\ExpoPush\Data\PushReceipt;
  *
  * @extends Collection<array-key, PushReceipt>
  */
-class PushReceiptCollection extends Collection
+final class PushReceiptCollection extends Collection
 {
     public function __construct(PushReceipt ...$pushReceipt)
     {

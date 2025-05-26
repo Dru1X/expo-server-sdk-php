@@ -9,6 +9,42 @@ use PHPUnit\Framework\TestCase;
 class PushReceiptIdCollectionTest extends TestCase
 {
     #[Test]
+    public function add_appends_receipt_id_to_collection(): void
+    {
+        $collection = new PushReceiptIdCollection('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+
+        $collection->add('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
+
+        $this->assertCount(2, $collection);
+
+        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $collection->get(0));
+        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $collection->get(1));
+    }
+
+    #[Test]
+    public function set_inserts_receipt_id_to_collection_at_index(): void
+    {
+        $collection = new PushReceiptIdCollection();
+
+        $collection->set(9, 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+
+        $this->assertCount(1, $collection);
+        $this->assertNull($collection->get(0));
+        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $collection->get(9));
+    }
+
+    #[Test]
+    public function set_replaces_receipt_id_in_collection_at_index(): void
+    {
+        $collection = new PushReceiptIdCollection('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+
+        $collection->set(0, 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
+
+        $this->assertCount(1, $collection);
+        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $collection->get(0));
+    }
+
+    #[Test]
     public function collection_is_iterable(): void
     {
         $collection = new PushReceiptIdCollection(
@@ -134,10 +170,15 @@ class PushReceiptIdCollectionTest extends TestCase
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         );
 
-        $this->assertJsonStringEqualsJsonString(
-            '["XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY", "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ"]',
-            json_encode($collection),
-        );
+        $expectedJson = <<<JSON
+[
+  "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+  "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
+  "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ"
+]
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($collection));
     }
 
     #[Test]
@@ -149,9 +190,14 @@ class PushReceiptIdCollectionTest extends TestCase
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         );
 
-        $this->assertJsonStringEqualsJsonString(
-            '["XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY", "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ"]',
-            $collection->toJson(),
-        );
+        $expectedJson = <<<JSON
+[
+  "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+  "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
+  "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ"
+]
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
     }
 }

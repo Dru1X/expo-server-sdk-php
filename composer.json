@@ -21,7 +21,7 @@
     "php": ">=8.4",
     "ext-json": "*",
     "ext-zlib": "*",
-    "saloonphp/saloon": "^3.11"
+    "saloonphp/saloon": "3.11"
   },
   "require-dev": {
     "phpunit/phpunit": "^12.1"

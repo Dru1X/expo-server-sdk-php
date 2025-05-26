@@ -11,6 +11,54 @@ use PHPUnit\Framework\TestCase;
 class PushReceiptCollectionTest extends TestCase
 {
     #[Test]
+    public function add_appends_receipt_to_collection(): void
+    {
+        $collection = new PushReceiptCollection(
+            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
+        );
+
+        $collection->add(
+            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok)
+        );
+
+        $this->assertCount(2, $collection);
+
+        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $collection->get(0)->id);
+        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $collection->get(1)->id);
+    }
+
+    #[Test]
+    public function set_inserts_receipt_to_collection_at_index(): void
+    {
+        $collection = new PushReceiptCollection();
+
+        $collection->set(9, new PushReceipt(
+            id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            status: PushStatus::Ok,
+        ));
+
+        $this->assertCount(1, $collection);
+        $this->assertNull($collection->get(0));
+        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $collection->get(9)->id);
+    }
+
+    #[Test]
+    public function set_replaces_receipt_in_collection_at_index(): void
+    {
+        $collection = new PushReceiptCollection(
+            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok)
+        );
+
+        $collection->set(0, new PushReceipt(
+            id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+            status: PushStatus::Ok,
+        ));
+
+        $this->assertCount(1, $collection);
+        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $collection->get(0)->id);
+    }
+
+    #[Test]
     public function get_by_id_returns_correct_receipt(): void
     {
         $collection = new PushReceiptCollection(
@@ -166,10 +214,24 @@ class PushReceiptCollectionTest extends TestCase
             new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok),
         );
 
-        $this->assertJsonStringEqualsJsonString(
-            '[{"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", "status": "ok"}, {"id": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY", "status": "ok"}, {"id": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ", "status": "ok"}]',
-            json_encode($collection),
-        );
+        $expectedJson = <<<JSON
+[
+  {
+    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    "status": "ok"
+  },
+  {
+    "id": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
+    "status": "ok"
+  },
+  {
+    "id": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ",
+    "status": "ok"
+  }
+]
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($collection));
     }
 
     #[Test]
@@ -181,9 +243,23 @@ class PushReceiptCollectionTest extends TestCase
             new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok),
         );
 
-        $this->assertJsonStringEqualsJsonString(
-            '[{"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", "status": "ok"}, {"id": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY", "status": "ok"}, {"id": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ", "status": "ok"}]',
-            $collection->toJson(),
-        );
+        $expectedJson = <<<JSON
+[
+  {
+    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    "status": "ok"
+  },
+  {
+    "id": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
+    "status": "ok"
+  },
+  {
+    "id": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ",
+    "status": "ok"
+  }
+]
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
     }
 }
