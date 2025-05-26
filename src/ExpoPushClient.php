@@ -2,22 +2,22 @@
 
 namespace Dru1x\ExpoPush;
 
+use Dru1x\ExpoPush\Collections\PushErrorCollection;
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
-use Dru1x\ExpoPush\Collections\PushErrorCollection;
-use Dru1x\ExpoPush\Data\PushResult;
 use Dru1x\ExpoPush\Data\PushMessage;
 use Dru1x\ExpoPush\Exception\RequestExceptionHandler;
 use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
 use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
+use Dru1x\ExpoPush\Results\GetReceiptsResult;
+use Dru1x\ExpoPush\Results\SendNotificationsResult;
 use Generator;
 use Saloon\Exceptions\InvalidPoolItemException;
-use Saloon\Exceptions\Request\FatalRequestException;
-use Saloon\Exceptions\Request\RequestException;
 use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\Connector;
+use Saloon\Http\Pool;
 use Saloon\Http\Response;
 
 final class ExpoPushClient extends Connector
@@ -40,18 +40,22 @@ final class ExpoPushClient extends Connector
      *
      * @param PushMessageCollection|PushMessage[] $pushMessages
      *
-     * @return PushResult
+     * @return SendNotificationsResult
      * @throws InvalidPoolItemException
      */
-    public function sendNotifications(PushMessageCollection|array $pushMessages): PushResult
+    public function sendNotifications(PushMessageCollection|array $pushMessages): SendNotificationsResult
     {
         // Ensure push messages are in a collection
         if (is_array($pushMessages)) {
             $pushMessages = new PushMessageCollection(...$pushMessages);
         }
 
-        // Make a new pool with the concurrency limit set
-        $pool = $this->pool(concurrency: self::MAX_CONCURRENT_REQUESTS);
+        // Prepare ticket and error collections
+        $tickets = new PushTicketCollection();
+        $errors  = new PushErrorCollection();
+
+        // Prepare a new request pool
+        $pool = $this->makeRequestPool($errors);
 
         // Split the message collection into a set of requests and add them to the pool
         $pool->setRequests(function () use ($pushMessages): Generator {
@@ -61,10 +65,6 @@ final class ExpoPushClient extends Connector
                 yield new SendNotificationsRequest($pushMessages);
             }
         });
-
-        // Prepare ticket and error collections
-        $tickets = new PushTicketCollection();
-        $errors  = new PushErrorCollection();
 
         // When a response is received...
         $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($tickets): void {
@@ -77,39 +77,62 @@ final class ExpoPushClient extends Connector
             }
         });
 
-        // When a request error occurs...
-        $pool->withExceptionHandler(new RequestExceptionHandler(SendNotificationsRequest::MAX_NOTIFICATION_COUNT, $errors));
-
         // Send all the requests
         $pool->send()->wait();
 
         // Merge all the chunks of push tickets into a single ordered collection and return
-        return new PushResult($tickets, $errors);
+        return new SendNotificationsResult($tickets, $errors);
     }
 
     /**
      * Get available push receipts with the given IDs
      *
+     * This supports request concurrency, with up to 6 requests being sent at once
+     *
      * @param PushReceiptIdCollection|string[] $receiptIds
      *
-     * @return PushReceiptCollection
-     * @throws FatalRequestException
-     * @throws RequestException
+     * @return GetReceiptsResult
+     * @throws InvalidPoolItemException
      */
-    public function getReceipts(PushReceiptIdCollection|array $receiptIds): PushReceiptCollection
+    public function getReceipts(PushReceiptIdCollection|array $receiptIds): GetReceiptsResult
     {
         // Ensure receipt IDs are in a collection
         if (is_array($receiptIds)) {
             $receiptIds = new PushReceiptIdCollection(...$receiptIds);
         }
 
-        // Prepare and send the request
-        $response = $this->send(
-            new GetReceiptsRequest($receiptIds)
-        );
+        // Prepare receipt and error collections
+        $receipts = new PushReceiptCollection();
+        $errors   = new PushErrorCollection();
 
-        // Convert the response to a push receipt collection and return
-        return $response->dtoOrFail();
+        // Prepare a new request pool
+        $pool = $this->makeRequestPool($errors);
+
+        // Split the receipt ID collection into a set of requests and add them to the pool
+        $pool->setRequests(function () use ($receiptIds): Generator {
+            $chunks = $receiptIds->chunk(GetReceiptsRequest::MAX_RECEIPT_COUNT);
+
+            foreach ($chunks as $chunk) {
+                yield new GetReceiptsRequest($chunk);
+            }
+        });
+
+        // When a response is received...
+        $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($receipts): void {
+            /** @var PushReceiptCollection $receiptBatch */
+            $receiptBatch = $response->dtoOrFail();
+            $offset       = $requestIndex * GetReceiptsRequest::MAX_RECEIPT_COUNT;
+
+            foreach ($receiptBatch as $index => $receipt) {
+                $receipts->set($offset + $index, $receipt);
+            }
+        });
+
+        // Send all the requests
+        $pool->send()->wait();
+
+        // Merge all the chunks of push receipts into a single collection and return
+        return new GetReceiptsResult($receipts, $errors);
     }
 
     // Helpers ----
@@ -143,5 +166,23 @@ final class ExpoPushClient extends Connector
     protected function defaultAuth(): ?TokenAuthenticator
     {
         return $this->authToken ? new TokenAuthenticator($this->authToken) : null;
+    }
+
+    /**
+     * Make a request pool with a concurrency limit and error handler
+     *
+     * @param PushErrorCollection $errors A collection in which to store any push errors
+     *
+     * @return Pool
+     */
+    protected function makeRequestPool(PushErrorCollection $errors): Pool
+    {
+        // Make a new pool with a concurrency limit and exception handler
+        return $this->pool(
+            concurrency: self::MAX_CONCURRENT_REQUESTS,
+            exceptionHandler: new RequestExceptionHandler(
+                batchSize: SendNotificationsRequest::MAX_NOTIFICATION_COUNT,
+                errors: $errors),
+        );
     }
 }

@@ -3,7 +3,9 @@
 namespace Dru1x\ExpoPush\Tests\Unit\Collections;
 
 use Dru1x\ExpoPush\Collections\PushReceiptCollection;
+use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Data\PushReceipt;
+use Dru1x\ExpoPush\Data\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\Enums\PushStatus;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -14,11 +16,11 @@ class PushReceiptCollectionTest extends TestCase
     public function add_appends_receipt_to_collection(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
         );
 
         $collection->add(
-            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok)
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
         );
 
         $this->assertCount(2, $collection);
@@ -32,10 +34,7 @@ class PushReceiptCollectionTest extends TestCase
     {
         $collection = new PushReceiptCollection();
 
-        $collection->set(9, new PushReceipt(
-            id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            status: PushStatus::Ok,
-        ));
+        $collection->set(9, new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'));
 
         $this->assertCount(1, $collection);
         $this->assertNull($collection->get(0));
@@ -46,13 +45,10 @@ class PushReceiptCollectionTest extends TestCase
     public function set_replaces_receipt_in_collection_at_index(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok)
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
         );
 
-        $collection->set(0, new PushReceipt(
-            id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-            status: PushStatus::Ok,
-        ));
+        $collection->set(0, new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'));
 
         $this->assertCount(1, $collection);
         $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $collection->get(0)->id);
@@ -62,9 +58,9 @@ class PushReceiptCollectionTest extends TestCase
     public function get_by_id_returns_correct_receipt(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
-            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok),
-            new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok),
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
         );
 
         $receipt = $collection->getById('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
@@ -78,9 +74,9 @@ class PushReceiptCollectionTest extends TestCase
     public function get_by_id_returns_null_if_receipt_not_found(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
-            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok),
-            new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok),
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
         );
 
         $receipt = $collection->getById('ABCDEFGH-ABCDEF-ABCDEF-ABCDEF-ABCDEFGHIJKL');;
@@ -92,9 +88,9 @@ class PushReceiptCollectionTest extends TestCase
     public function collection_is_iterable(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
-            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok),
-            new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok),
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
         );
 
         foreach ($collection as $receipt) {
@@ -105,9 +101,9 @@ class PushReceiptCollectionTest extends TestCase
     #[Test]
     public function contains_returns_true_when_push_receipt_exists(): void
     {
-        $receipt1 = new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok);
-        $receipt2 = new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok);
-        $receipt3 = new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok);
+        $receipt1 = new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+        $receipt2 = new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
+        $receipt3 = new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ');
 
         $collection = new PushReceiptCollection($receipt1, $receipt2, $receipt3);
 
@@ -118,9 +114,9 @@ class PushReceiptCollectionTest extends TestCase
     #[Test]
     public function contains_returns_false_when_push_receipt_doesnt_exist(): void
     {
-        $receipt1 = new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok);
-        $receipt2 = new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok);
-        $receipt3 = new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok);
+        $receipt1 = new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+        $receipt2 = new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
+        $receipt3 = new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ');
 
         $collection = new PushReceiptCollection($receipt1, $receipt2);
 
@@ -130,8 +126,8 @@ class PushReceiptCollectionTest extends TestCase
     #[Test]
     public function get_returns_correct_push_receipt(): void
     {
-        $receipt1 = new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok);
-        $receipt2 = new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok);
+        $receipt1 = new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+        $receipt2 = new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
 
         $collection = new PushReceiptCollection($receipt1, $receipt2);
 
@@ -144,8 +140,8 @@ class PushReceiptCollectionTest extends TestCase
     public function get_returns_null_if_push_receipt_not_found(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
-            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok),
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
         );
 
         $receipt = $collection->get(99);
@@ -157,9 +153,9 @@ class PushReceiptCollectionTest extends TestCase
     public function count_returns_correct_push_receipt_count(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
-            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok),
-            new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok),
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
         );
 
         $this->assertCount(3, $collection);
@@ -169,12 +165,12 @@ class PushReceiptCollectionTest extends TestCase
     public function chunk_returns_correctly_sized_chunks(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
-            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok),
-            new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok),
-            new PushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA', status: PushStatus::Ok),
-            new PushReceipt(id: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB', status: PushStatus::Ok),
-            new PushReceipt(id: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC', status: PushStatus::Ok),
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+            new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+            new SuccessfulPushReceipt(id: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB'),
+            new SuccessfulPushReceipt(id: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC'),
         );
 
         $chunks = $collection->chunk(2);
@@ -187,12 +183,29 @@ class PushReceiptCollectionTest extends TestCase
     }
 
     #[Test]
+    public function values_returns_collection_with_consecutive_keys(): void
+    {
+        $collection = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+        );
+
+        $collection->set(9, new SuccessfulPushReceipt(
+            id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'
+        ));
+
+        $newCollection = $collection->values();
+
+        $this->assertIsList($newCollection->toArray());
+    }
+
+    #[Test]
     public function to_array_returns_push_receipt_array(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
-            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok),
-            new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok),
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
         );
 
         $array = $collection->toArray();
@@ -209,9 +222,9 @@ class PushReceiptCollectionTest extends TestCase
     public function json_encode_returns_valid_json_string(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
-            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok),
-            new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok),
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
         );
 
         $expectedJson = <<<JSON
@@ -238,9 +251,9 @@ JSON;
     public function to_json_returns_valid_json_string(): void
     {
         $collection = new PushReceiptCollection(
-            new PushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', status: PushStatus::Ok),
-            new PushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', status: PushStatus::Ok),
-            new PushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', status: PushStatus::Ok),
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
         );
 
         $expectedJson = <<<JSON

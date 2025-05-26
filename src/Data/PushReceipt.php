@@ -6,15 +6,13 @@ use Dru1x\ExpoPush\Enums\PushStatus;
 use Dru1x\ExpoPush\Traits\ConvertsToJson;
 use JsonSerializable;
 
-final readonly class PushReceipt implements JsonSerializable
+abstract readonly class PushReceipt implements JsonSerializable
 {
     use ConvertsToJson;
 
     public function __construct(
         public string     $id,
         public PushStatus $status,
-        public ?string    $message = null,
-        public ?array     $details = null,
     ) {}
 
     // Internals ----

@@ -4,7 +4,10 @@ namespace Dru1x\ExpoPush\Requests;
 
 use Dru1x\ExpoPush\Collections\PushReceiptCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
+use Dru1x\ExpoPush\Data\FailedPushReceipt;
 use Dru1x\ExpoPush\Data\PushReceipt;
+use Dru1x\ExpoPush\Data\PushToken;
+use Dru1x\ExpoPush\Data\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\Enums\PushStatus;
 use Dru1x\ExpoPush\Traits\CompressesBody;
 use JsonException;
@@ -33,11 +36,20 @@ final class GetReceiptsRequest extends Request implements HasBody
         return '/getReceipts';
     }
 
+    // DTO ----
+
+    /**
+     * @inheritDoc
+     *
+     * @param Response $response
+     *
+     * @return PushReceiptCollection
+     * @throws UnexpectedValueException If the response body could not be decoded
+     */
     public function createDtoFromResponse(Response $response): PushReceiptCollection
     {
         try {
-            $data   = $response->json('data');
-            $errors = $response->json('errors');
+            $data = $response->json('data');
         } catch (JsonException $exception) {
             throw new UnexpectedValueException(
                 message: "Response could not be decoded: {$exception->getMessage()}",
@@ -45,19 +57,56 @@ final class GetReceiptsRequest extends Request implements HasBody
             );
         }
 
-        if (!empty($errors)) {
-            throw new RuntimeException(
-                message: "Request failed: " . $errors[0]['message'] ?? 'Unknown error'
-            );
+        $receipts = new PushReceiptCollection();
+
+        foreach ($data as $id => $receiptData) {
+
+            // Parse the receipt status
+            $status = PushStatus::from($receiptData['status']);
+
+            $receipts->add(match ($status) {
+                PushStatus::Ok    => $this->makeSuccessfulPushReceipt($id),
+                PushStatus::Error => $this->makeFailedPushReceipt($id, $receiptData),
+            });
         }
 
-        return new PushReceiptCollection(
-            ...array_map(fn(array $receiptData, string $id) => new PushReceipt(
-                id: $id,
-                status: PushStatus::from($receiptData['status']),
-                message: $receiptData['message'] ?? '',
-                details: $receiptData['details'] ?? [],
-            ), $data, array_keys($data))
+        return $receipts;
+    }
+
+    /**
+     * Make a SuccessfulPushReceipt from the given receipt ID
+     *
+     * @param string $id
+     *
+     * @return SuccessfulPushReceipt
+     */
+    protected function makeSuccessfulPushReceipt(string $id): SuccessfulPushReceipt
+    {
+        return new SuccessfulPushReceipt(
+            id: $id,
+        );
+    }
+
+    /**
+     * Make a FailedPushReceipt from the given data
+     *
+     * @param string                                 $id
+     * @param array{message: string, details: array} $data
+     *
+     * @return FailedPushReceipt
+     */
+    protected function makeFailedPushReceipt(string $id, array $data): FailedPushReceipt
+    {
+        $detailsToken = $data['details']['expoPushToken'] ?? null;
+
+        if ($detailsToken) {
+            $data['details']['expoPushToken'] = new PushToken($detailsToken);
+        }
+
+        return new FailedPushReceipt(
+            id: $id,
+            message: $data['message'],
+            details: $data['details'],
         );
     }
 

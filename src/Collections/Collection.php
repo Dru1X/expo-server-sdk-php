@@ -131,6 +131,16 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     }
 
     /**
+     * Get a new collection with the keys reset to consecutive integers
+     *
+     * @return static<TKey, TValue>
+     */
+    public function values(): static
+    {
+        return new static(...array_values($this->items));
+    }
+
+    /**
      * Convert this collection to an array
      *
      * @return array<TKey, TValue>

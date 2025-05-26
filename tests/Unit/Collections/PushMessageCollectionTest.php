@@ -291,6 +291,26 @@ class PushMessageCollectionTest extends TestCase
     }
 
     #[Test]
+    public function values_returns_collection_with_consecutive_keys(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(
+                to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                title: 'Test Notification 1'
+            ),
+        );
+
+        $collection->set(9, new PushMessage(
+            to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+            title: 'Test Notification 2'
+        ));
+
+        $newCollection = $collection->values();
+
+        $this->assertIsList($newCollection->toArray());
+    }
+
+    #[Test]
     public function to_array_returns_push_message_array(): void
     {
         $collection = new PushMessageCollection(

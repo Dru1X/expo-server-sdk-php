@@ -294,6 +294,26 @@ class PushTicketCollectionTest extends TestCase
     }
 
     #[Test]
+    public function values_returns_collection_with_consecutive_keys(): void
+    {
+        $collection = new PushTicketCollection(
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            ),
+        );
+
+        $collection->set(9, new SuccessfulPushTicket(
+            token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+            receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+        ));
+
+        $newCollection = $collection->values();
+
+        $this->assertIsList($newCollection->toArray());
+    }
+
+    #[Test]
     public function to_array_returns_push_ticket_array(): void
     {
         $collection = new PushTicketCollection(

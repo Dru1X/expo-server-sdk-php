@@ -151,6 +151,21 @@ class PushTokenCollectionTest extends TestCase
     }
 
     #[Test]
+    public function values_returns_collection_with_consecutive_keys(): void
+    {
+        $collection = new PushTokenCollection(
+            new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+        );
+
+        $collection->set(9, new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'));
+
+        $newCollection = $collection->values();
+
+        $this->assertIsList($newCollection->toArray());
+    }
+
+    #[Test]
     public function to_array_returns_push_token_array(): void
     {
         $collection = new PushTokenCollection(
