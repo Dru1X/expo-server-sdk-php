@@ -5,18 +5,14 @@
 namespace Dru1x\ExpoPush\Tests\Unit\Requests;
 
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
-use Dru1x\ExpoPush\Data\PushReceipt;
 use Dru1x\ExpoPush\ExpoPushClient;
 use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
 use OverflowException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use Saloon\Config;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
-use Saloon\Http\PendingRequest;
-use Saloon\Http\Request;
 use UnexpectedValueException;
 
 class GetReceiptsRequestTest extends TestCase
@@ -154,5 +150,35 @@ class GetReceiptsRequestTest extends TestCase
         $request->createDtoFromResponse(
             $this->connector->send($request)
         );
+    }
+
+    #[Test]
+    public function body_throws_exception_when_receipt_id_collection_is_too_large(): void
+    {
+        $receiptIdCount = GetReceiptsRequest::MAX_RECEIPT_COUNT + 1;
+        $receiptIds     = [];
+
+        for ($i = 0; $i <= $receiptIdCount; $i++) {
+            $receiptIds[] = $this->generatePushReceiptId();
+        }
+
+        $request = new GetReceiptsRequest(
+            new PushReceiptIdCollection(...$receiptIds)
+        );
+
+        $this->expectException(OverflowException::class);
+
+        $request->body();
+    }
+
+    // Helpers ----
+
+    protected function generatePushReceiptId(): string
+    {
+        $data    = random_bytes(16);
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 }

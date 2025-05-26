@@ -19,12 +19,24 @@ use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\Connector;
 use Saloon\Http\Pool;
 use Saloon\Http\Response;
+use Saloon\RateLimitPlugin\Contracts\RateLimitStore;
+use Saloon\RateLimitPlugin\Limit;
+use Saloon\RateLimitPlugin\Stores\MemoryStore;
+use Saloon\RateLimitPlugin\Traits\HasRateLimits;
 
 final class ExpoPushClient extends Connector
 {
+    use HasRateLimits;
+
     public const int MAX_CONCURRENT_REQUESTS = 6;
 
-    public function __construct(protected readonly ?string $authToken = null) {}
+    public function __construct(
+        ?RateLimitStore            $rateLimitStore = new MemoryStore(),
+        protected readonly ?string $authToken = null,
+    )
+    {
+        $this->rateLimitStore = $rateLimitStore;
+    }
 
     public function resolveBaseUrl(): string
     {
@@ -133,6 +145,23 @@ final class ExpoPushClient extends Connector
 
         // Merge all the chunks of push receipts into a single collection and return
         return new GetReceiptsResult($receipts, $errors);
+    }
+
+    // Rate Limits ----
+
+    protected function resolveLimits(): array
+    {
+        return [
+            Limit::allow(6)
+                ->everySeconds(1)
+                ->sleep()
+                ->name('expo-push-limit'),
+        ];
+    }
+
+    protected function resolveRateLimitStore(): RateLimitStore
+    {
+        return $this->rateLimitStore ?? new MemoryStore();
     }
 
     // Helpers ----
