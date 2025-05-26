@@ -8,6 +8,7 @@ use Dru1x\ExpoPush\Enums\PushErrorCode;
 use JsonException;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
+use Saloon\RateLimitPlugin\Exceptions\RateLimitReachedException;
 
 final class RequestExceptionHandler
 {
@@ -16,7 +17,7 @@ final class RequestExceptionHandler
     /**
      * @throws JsonException
      */
-    public function __invoke(FatalRequestException|RequestException $exception, int $requestIndex): void
+    public function __invoke(FatalRequestException|RequestException|RateLimitReachedException $exception, int $requestIndex): void
     {
         $startIndex = $requestIndex * $this->batchSize;
         $endIndex   = $startIndex + $this->batchSize - 1;
@@ -25,6 +26,17 @@ final class RequestExceptionHandler
         if ($exception instanceof FatalRequestException) {
             $this->errors->add(new PushError(
                 code: PushErrorCode::Failed,
+                message: $exception->getMessage(),
+                startIndex: $startIndex,
+                endIndex: $endIndex,
+            ));
+            return;
+        }
+
+        // A rate limit was reached
+        if($exception instanceof RateLimitReachedException){
+            $this->errors->add(new PushError(
+                code: PushErrorCode::TooManyRequests,
                 message: $exception->getMessage(),
                 startIndex: $startIndex,
                 endIndex: $endIndex,
