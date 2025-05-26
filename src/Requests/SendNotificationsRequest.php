@@ -14,7 +14,6 @@ use Dru1x\ExpoPush\Traits\CompressesBody;
 use InvalidArgumentException;
 use JsonException;
 use OverflowException;
-use RuntimeException;
 use Saloon\Contracts\Body\HasBody;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
@@ -39,23 +38,24 @@ final class SendNotificationsRequest extends Request implements HasBody
         return '/send';
     }
 
+    // DTO ----
+
+    /**
+     * @inheritDoc
+     *
+     * @param Response $response
+     *
+     * @return PushTicketCollection
+     * @throws UnexpectedValueException If the response body could not be decoded
+     */
     public function createDtoFromResponse(Response $response): PushTicketCollection
     {
         try {
-            $errors = $response->json('errors');
-            $data   = $response->json('data');
+            $data = $response->json('data');
         } catch (JsonException $exception) {
-            // TODO: Throw custom exception here?
             throw new UnexpectedValueException(
                 message: "Response could not be decoded: {$exception->getMessage()}",
                 previous: $exception
-            );
-        }
-
-        // TODO: Throw custom exception here?
-        if (!empty($errors)) {
-            throw new RuntimeException(
-                message: "Request failed: " . $errors[0]['message'] ?? 'Unknown error'
             );
         }
 
@@ -78,8 +78,14 @@ final class SendNotificationsRequest extends Request implements HasBody
         return $tickets;
     }
 
-    // DTOs ----
-
+    /**
+     * Make a SuccessfulPushTicket from the given data
+     *
+     * @param PushToken         $token
+     * @param array{id: string} $data
+     *
+     * @return SuccessfulPushTicket
+     */
     protected function makeSuccessfulPushTicket(PushToken $token, array $data): SuccessfulPushTicket
     {
         return new SuccessfulPushTicket(
@@ -88,10 +94,18 @@ final class SendNotificationsRequest extends Request implements HasBody
         );
     }
 
+    /**
+     * Make a FailedPushTicket from the given data
+     *
+     * @param PushToken                                                                       $token
+     * @param array{message: string, details: ?array{error: ?string, expoPushToken: ?string}} $data
+     *
+     * @return FailedPushTicket
+     */
     protected function makeFailedPushTicket(PushToken $token, array $data): FailedPushTicket
     {
         $detailsError = $data['details']['error'] ?? null;
-        $detailsToken = $data['details']['token'] ?? null;
+        $detailsToken = $data['details']['expoPushToken'] ?? null;
 
         return new FailedPushTicket(
             token: $token,
@@ -136,15 +150,21 @@ final class SendNotificationsRequest extends Request implements HasBody
     {
         foreach ($this->pushMessages as $pushMessage) {
 
-            // Calculate the size of the data field when converted to JSON
+            // If there's no data in the push message, there's nothing to do
+            if (!$pushMessage->data) {
+                continue;
+            }
+
             try {
-                $dataBytes = $pushMessage->data ? strlen(json_encode($pushMessage->data, JSON_THROW_ON_ERROR)) : 0;
+                // Calculate the size of the data field when converted to JSON
+                $dataBytes = strlen(json_encode($pushMessage->data, JSON_THROW_ON_ERROR));
             } catch (JsonException $e) {
                 throw new InvalidArgumentException(
                     "Push message data could not be encoded as JSON: {$e->getMessage()}"
                 );
             }
 
+            // Check the size of the included data
             if ($dataBytes > self::MAX_MESSAGE_DATA_BYTES) {
                 throw new OverflowException(
                     "Individual push message data cannot be larger than " . self::MAX_MESSAGE_DATA_BYTES . " bytes"

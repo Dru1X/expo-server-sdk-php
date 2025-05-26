@@ -15,7 +15,6 @@ use InvalidArgumentException;
 use OverflowException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use Saloon\Config;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
@@ -182,34 +181,6 @@ class SendNotificationsRequestTest extends TestCase
         ]);
 
         $this->expectException(UnexpectedValueException::class);
-
-        $request->createDtoFromResponse(
-            $this->connector->send($request)
-        );
-    }
-
-    #[Test]
-    public function create_dto_from_response_throws_exception_for_error_response(): void
-    {
-        $request = new SendNotificationsRequest(
-            new PushMessageCollection()
-        );
-
-        $this->mockClient->addResponses([
-            SendNotificationsRequest::class => MockResponse::make(
-                body: [
-                    'errors' => [
-                        [
-                            "message" => "Too many notifications",
-                            "details" => [],
-                        ],
-                    ],
-                ],
-                headers: ['Content-Type' => 'application/json']
-            ),
-        ]);
-
-        $this->expectException(RuntimeException::class);
 
         $request->createDtoFromResponse(
             $this->connector->send($request)
