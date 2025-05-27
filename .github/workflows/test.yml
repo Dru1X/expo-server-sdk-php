@@ -10,16 +10,18 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
+      - name: Install dependencies
         uses: php-actions/composer@v6
 
-      - name: PHPUnit Tests
+      - name: Run PHPUnit tests
         uses: php-actions/phpunit@v4
         with:
           php_version: 8.4
           php_extensions: json zip xdebug
           configuration: phpunit.xml.dist
           coverage_text: true
+        env:
+          XDEBUG_MODE: coverage
