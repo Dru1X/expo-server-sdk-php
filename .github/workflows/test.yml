@@ -1,0 +1,27 @@
+name: Test
+
+on:
+  push
+
+jobs:
+  all-tests:
+    name: Run All Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: php-actions/composer@v6
+
+      - name: Run PHPUnit tests
+        uses: php-actions/phpunit@v4
+        with:
+          php_version: 8.4
+          php_extensions: json zip xdebug
+          configuration: phpunit.xml.dist
+          coverage_text: true
+        env:
+          XDEBUG_MODE: coverage
