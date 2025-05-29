@@ -16,8 +16,8 @@ final class ExpoPushConnector extends Connector
     public const int MAX_CONCURRENT_REQUESTS = 6;
 
     public function __construct(
-        ?RateLimitStore            $rateLimitStore = new MemoryStore(),
         protected readonly ?string $authToken = null,
+        ?RateLimitStore            $rateLimitStore = new MemoryStore(),
     )
     {
         $this->rateLimitStore = $rateLimitStore;
