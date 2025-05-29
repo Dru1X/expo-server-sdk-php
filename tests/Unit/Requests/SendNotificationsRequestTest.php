@@ -9,7 +9,7 @@ use Dru1x\ExpoPush\Data\FailedPushTicket;
 use Dru1x\ExpoPush\Data\PushMessage;
 use Dru1x\ExpoPush\Data\PushToken;
 use Dru1x\ExpoPush\Data\SuccessfulPushTicket;
-use Dru1x\ExpoPush\ExpoPushClient;
+use Dru1x\ExpoPush\ExpoPushConnector;
 use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
 use InvalidArgumentException;
 use OverflowException;
@@ -23,7 +23,7 @@ use UnexpectedValueException;
 class SendNotificationsRequestTest extends TestCase
 {
     protected MockClient $mockClient;
-    protected ExpoPushClient $connector;
+    protected ExpoPushConnector $connector;
 
     protected function setUp(): void
     {
@@ -32,7 +32,7 @@ class SendNotificationsRequestTest extends TestCase
         MockClient::destroyGlobal();
 
         $this->mockClient = new MockClient();
-        $this->connector  = new ExpoPushClient()->withMockClient($this->mockClient);
+        $this->connector  = new ExpoPushConnector()->withMockClient($this->mockClient);
 
         Config::preventStrayRequests();
     }

@@ -2,18 +2,18 @@
 
 /** @noinspection PhpUnhandledExceptionInspection */
 
-namespace Dru1x\ExpoPush\Tests\Feature;
 
 use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
+use Dru1x\ExpoPush\Data\PushMessage;
 use Dru1x\ExpoPush\Data\PushReceipt;
 use Dru1x\ExpoPush\Data\PushTicket;
-use Dru1x\ExpoPush\Data\SuccessfulPushTicket;
-use Dru1x\ExpoPush\Data\PushMessage;
 use Dru1x\ExpoPush\Data\PushToken;
+use Dru1x\ExpoPush\Data\SuccessfulPushTicket;
 use Dru1x\ExpoPush\Enums\PushErrorCode;
 use Dru1x\ExpoPush\Enums\PushStatus;
-use Dru1x\ExpoPush\ExpoPushClient;
+use Dru1x\ExpoPush\ExpoPush;
+use Dru1x\ExpoPush\ExpoPushConnector;
 use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
 use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
 use PHPUnit\Framework\Attributes\Test;
@@ -22,10 +22,10 @@ use Saloon\Config;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 
-class ExpoPushClientTest extends TestCase
+class ExpoPushTest extends TestCase
 {
     protected MockClient $mockClient;
-    protected ExpoPushClient $expoPush;
+    protected ExpoPushConnector $connector;
 
     protected function setUp(): void
     {
@@ -34,7 +34,8 @@ class ExpoPushClientTest extends TestCase
         MockClient::destroyGlobal();
 
         $this->mockClient = new MockClient();
-        $this->expoPush   = new ExpoPushClient()->withMockClient($this->mockClient);
+        $this->connector  = new ExpoPushConnector()->withMockClient($this->mockClient);
+        $this->service    = new ExpoPush($this->connector);
 
         Config::preventStrayRequests();
     }
@@ -63,7 +64,7 @@ class ExpoPushClientTest extends TestCase
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification'),
         );
 
-        $result = $this->expoPush->sendNotifications($messages);
+        $result = $this->service->sendNotifications($messages);
 
         $this->mockClient->assertSentCount(1, SendNotificationsRequest::class);
 
@@ -99,7 +100,7 @@ class ExpoPushClientTest extends TestCase
             );
         }
 
-        $result = $this->expoPush->sendNotifications($messages);
+        $result = $this->service->sendNotifications($messages);
 
         $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
 
@@ -130,7 +131,7 @@ class ExpoPushClientTest extends TestCase
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification'),
         ];
 
-        $result = $this->expoPush->sendNotifications($messages);
+        $result = $this->service->sendNotifications($messages);
 
         $this->mockClient->assertSentCount(1, SendNotificationsRequest::class);
 
@@ -166,7 +167,7 @@ class ExpoPushClientTest extends TestCase
             );
         }
 
-        $result = $this->expoPush->sendNotifications($messages);
+        $result = $this->service->sendNotifications($messages);
 
         $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
 
@@ -214,7 +215,7 @@ class ExpoPushClientTest extends TestCase
             );
         }
 
-        $result = $this->expoPush->sendNotifications($messages);
+        $result = $this->service->sendNotifications($messages);
 
         $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
 
@@ -271,7 +272,7 @@ class ExpoPushClientTest extends TestCase
             );
         }
 
-        $result = $this->expoPush->sendNotifications($messages);
+        $result = $this->service->sendNotifications($messages);
 
         $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
 
@@ -304,7 +305,7 @@ class ExpoPushClientTest extends TestCase
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         );
 
-        $result = $this->expoPush->getReceipts($receiptIds);
+        $result = $this->service->getReceipts($receiptIds);
 
         $this->mockClient->assertSentCount(1, GetReceiptsRequest::class);
 
@@ -340,7 +341,7 @@ class ExpoPushClientTest extends TestCase
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         ];
 
-        $result = $this->expoPush->getReceipts($receiptIds);
+        $result = $this->service->getReceipts($receiptIds);
 
         $this->mockClient->assertSentCount(1, GetReceiptsRequest::class);
 
@@ -393,7 +394,7 @@ class ExpoPushClientTest extends TestCase
             );
         }
 
-        $result = $this->expoPush->getReceipts($receiptIds);
+        $result = $this->service->getReceipts($receiptIds);
 
         $this->mockClient->assertSentCount(10, GetReceiptsRequest::class);
 
@@ -450,7 +451,7 @@ class ExpoPushClientTest extends TestCase
             );
         }
 
-        $result = $this->expoPush->getReceipts($receiptIds);
+        $result = $this->service->getReceipts($receiptIds);
 
         $this->mockClient->assertSentCount(10, GetReceiptsRequest::class);
 
@@ -466,7 +467,7 @@ class ExpoPushClientTest extends TestCase
             file_get_contents(dirname(__DIR__, 2) . '/composer.json')
         );
 
-        $this->assertEquals($composer->version, $this->expoPush->sdkVersion());
+        $this->assertEquals($composer->version, $this->service->sdkVersion());
     }
 
     // Helpers ----

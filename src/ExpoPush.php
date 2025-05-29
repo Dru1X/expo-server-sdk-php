@@ -15,35 +15,12 @@ use Dru1x\ExpoPush\Results\GetReceiptsResult;
 use Dru1x\ExpoPush\Results\SendNotificationsResult;
 use Generator;
 use Saloon\Exceptions\InvalidPoolItemException;
-use Saloon\Http\Auth\TokenAuthenticator;
-use Saloon\Http\Connector;
 use Saloon\Http\Pool;
 use Saloon\Http\Response;
-use Saloon\RateLimitPlugin\Contracts\RateLimitStore;
-use Saloon\RateLimitPlugin\Limit;
-use Saloon\RateLimitPlugin\Stores\MemoryStore;
-use Saloon\RateLimitPlugin\Traits\HasRateLimits;
 
-final class ExpoPushClient extends Connector
+final class ExpoPush
 {
-    use HasRateLimits;
-
-    public const int MAX_CONCURRENT_REQUESTS = 6;
-
-    public function __construct(
-        ?RateLimitStore            $rateLimitStore = new MemoryStore(),
-        protected readonly ?string $authToken = null,
-    )
-    {
-        $this->rateLimitStore = $rateLimitStore;
-    }
-
-    public function resolveBaseUrl(): string
-    {
-        return 'https://exp.host/--/api/v2/push';
-    }
-
-    // Requests ----
+    public function __construct(protected ExpoPushConnector $connector) {}
 
     /**
      * Send a set of push notifications
@@ -67,11 +44,12 @@ final class ExpoPushClient extends Connector
         $errors  = new PushErrorCollection();
 
         // Prepare a new request pool
-        $pool = $this->makeRequestPool($errors);
+        $batchSize = SendNotificationsRequest::MAX_NOTIFICATION_COUNT;
+        $pool      = $this->makeRequestPool($batchSize, $errors);
 
         // Split the message collection into a set of requests and add them to the pool
-        $pool->setRequests(function () use ($pushMessages): Generator {
-            $chunks = $pushMessages->chunkByNotifications(SendNotificationsRequest::MAX_NOTIFICATION_COUNT);
+        $pool->setRequests(function () use ($batchSize, $pushMessages): Generator {
+            $chunks = $pushMessages->chunkByNotifications($batchSize);
 
             foreach ($chunks as $pushMessages) {
                 yield new SendNotificationsRequest($pushMessages);
@@ -79,12 +57,11 @@ final class ExpoPushClient extends Connector
         });
 
         // When a response is received...
-        $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($tickets): void {
-            /** @var PushTicketCollection $ticketBatch */
-            $ticketBatch = $response->dtoOrFail();
-            $offset      = $requestIndex * SendNotificationsRequest::MAX_NOTIFICATION_COUNT;
+        $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($batchSize, $tickets): void {
+            $batch  = $response->dtoOrFail();
+            $offset = $requestIndex * $batchSize;
 
-            foreach ($ticketBatch as $index => $ticket) {
+            foreach ($batch as $index => $ticket) {
                 $tickets->set($offset + $index, $ticket);
             }
         });
@@ -118,11 +95,12 @@ final class ExpoPushClient extends Connector
         $errors   = new PushErrorCollection();
 
         // Prepare a new request pool
-        $pool = $this->makeRequestPool($errors);
+        $batchSize = GetReceiptsRequest::MAX_RECEIPT_COUNT;
+        $pool      = $this->makeRequestPool($batchSize, $errors);
 
         // Split the receipt ID collection into a set of requests and add them to the pool
-        $pool->setRequests(function () use ($receiptIds): Generator {
-            $chunks = $receiptIds->chunk(GetReceiptsRequest::MAX_RECEIPT_COUNT);
+        $pool->setRequests(function () use ($batchSize, $receiptIds): Generator {
+            $chunks = $receiptIds->chunk($batchSize);
 
             foreach ($chunks as $chunk) {
                 yield new GetReceiptsRequest($chunk);
@@ -130,12 +108,11 @@ final class ExpoPushClient extends Connector
         });
 
         // When a response is received...
-        $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($receipts): void {
-            /** @var PushReceiptCollection $receiptBatch */
-            $receiptBatch = $response->dtoOrFail();
-            $offset       = $requestIndex * GetReceiptsRequest::MAX_RECEIPT_COUNT;
+        $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($batchSize, $receipts): void {
+            $batch  = $response->dtoOrFail();
+            $offset = $requestIndex * $batchSize;
 
-            foreach ($receiptBatch as $index => $receipt) {
+            foreach ($batch as $index => $receipt) {
                 $receipts->set($offset + $index, $receipt);
             }
         });
@@ -147,25 +124,6 @@ final class ExpoPushClient extends Connector
         return new GetReceiptsResult($receipts, $errors);
     }
 
-    // Rate Limits ----
-
-    protected function resolveLimits(): array
-    {
-        return [
-            Limit::allow(6)
-                ->everySeconds(1)
-                ->sleep()
-                ->name('expo-push-limit'),
-        ];
-    }
-
-    protected function resolveRateLimitStore(): RateLimitStore
-    {
-        return $this->rateLimitStore ?? new MemoryStore();
-    }
-
-    // Helpers ----
-
     /**
      * Get the installed version of this SDK
      *
@@ -173,45 +131,25 @@ final class ExpoPushClient extends Connector
      */
     public function sdkVersion(): string
     {
-        $composer = json_decode(
-            file_get_contents(dirname(__DIR__) . '/composer.json')
-        );
-
-        return $composer->version ?? 'unknown';
+        return $this->connector->sdkVersion();
     }
 
     // Internals ----
 
-    /** @inheritDoc */
-    protected function defaultHeaders(): array
-    {
-        return [
-            'Accept-Encoding' => 'gzip, deflate',
-            'User-Agent'      => "expo-server-sdk-php/{$this->sdkVersion()} (dru1x)",
-        ];
-    }
-
-    /** @inheritDoc */
-    protected function defaultAuth(): ?TokenAuthenticator
-    {
-        return $this->authToken ? new TokenAuthenticator($this->authToken) : null;
-    }
-
     /**
      * Make a request pool with a concurrency limit and error handler
      *
+     * @param int                 $batchSize The max number of elements to be sent per request
      * @param PushErrorCollection $errors A collection in which to store any push errors
      *
      * @return Pool
      */
-    protected function makeRequestPool(PushErrorCollection $errors): Pool
+    protected function makeRequestPool(int $batchSize, PushErrorCollection $errors): Pool
     {
         // Make a new pool with a concurrency limit and exception handler
-        return $this->pool(
-            concurrency: self::MAX_CONCURRENT_REQUESTS,
-            exceptionHandler: new RequestExceptionHandler(
-                batchSize: SendNotificationsRequest::MAX_NOTIFICATION_COUNT,
-                errors: $errors),
+        return $this->connector->pool(
+            concurrency: $this->connector::MAX_CONCURRENT_REQUESTS,
+            exceptionHandler: new RequestExceptionHandler($batchSize, $errors),
         );
     }
 }

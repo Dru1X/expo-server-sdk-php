@@ -5,7 +5,7 @@
 namespace Dru1x\ExpoPush\Tests\Unit\Requests;
 
 use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
-use Dru1x\ExpoPush\ExpoPushClient;
+use Dru1x\ExpoPush\ExpoPushConnector;
 use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
 use OverflowException;
 use PHPUnit\Framework\Attributes\Test;
@@ -18,7 +18,7 @@ use UnexpectedValueException;
 class GetReceiptsRequestTest extends TestCase
 {
     protected MockClient $mockClient;
-    protected ExpoPushClient $connector;
+    protected ExpoPushConnector $connector;
 
     protected function setUp(): void
     {
@@ -27,7 +27,7 @@ class GetReceiptsRequestTest extends TestCase
         MockClient::destroyGlobal();
 
         $this->mockClient = new MockClient();
-        $this->connector  = new ExpoPushClient()->withMockClient($this->mockClient);
+        $this->connector  = new ExpoPushConnector()->withMockClient($this->mockClient);
 
         Config::preventStrayRequests();
     }
