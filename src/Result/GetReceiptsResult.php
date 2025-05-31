@@ -1,6 +1,6 @@
 <?php
 
-namespace Dru1x\ExpoPush\Results;
+namespace Dru1x\ExpoPush\Result;
 
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;

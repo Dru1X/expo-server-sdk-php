@@ -1,26 +1,26 @@
 <?php
 
-namespace Dru1x\ExpoPush\Tests\Unit\Results;
+namespace Dru1x\ExpoPush\Tests\Unit\Result;
 
 use Dru1x\ExpoPush\PushError\PushError;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
-use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
-use Dru1x\ExpoPush\Results\SendNotificationsResult;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
+use Dru1x\ExpoPush\Result\GetReceiptsResult;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class SendNotificationsResultTest extends TestCase
+class GetReceiptsResultTest extends TestCase
 {
     #[Test]
     public function has_errors_returns_true_when_errors_are_present(): void
     {
-        $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(),
+        $result = new GetReceiptsResult(
+            receipts: new PushReceiptCollection(),
             errors: new PushErrorCollection(
                 new PushError(
                     code: PushErrorCode::Failed,
-                    message: 'Failed to send push notification'
+                    message: 'Failed to get push receipts'
                 )
             ),
         );
@@ -31,8 +31,8 @@ class SendNotificationsResultTest extends TestCase
     #[Test]
     public function has_errors_returns_false_when_error_collection_is_empty(): void
     {
-        $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(),
+        $result = new GetReceiptsResult(
+            receipts: new PushReceiptCollection(),
             errors: new PushErrorCollection(),
         );
 
@@ -42,8 +42,8 @@ class SendNotificationsResultTest extends TestCase
     #[Test]
     public function has_errors_returns_false_when_error_collection_is_missing(): void
     {
-        $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(),
+        $result = new GetReceiptsResult(
+            receipts: new PushReceiptCollection(),
             errors: null
         );
 
