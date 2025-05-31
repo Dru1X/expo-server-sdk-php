@@ -1,8 +1,8 @@
 <?php
 
-namespace Dru1x\ExpoPush\Collections;
+namespace Dru1x\ExpoPush\PushToken;
 
-use Dru1x\ExpoPush\Data\PushToken;
+use Dru1x\ExpoPush\Collections\Collection;
 
 /**
  * A collection of PushToken objects

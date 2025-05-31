@@ -2,10 +2,10 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushMessage;
 
-use Dru1x\ExpoPush\Collections\PushTokenCollection;
-use Dru1x\ExpoPush\Data\PushToken;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
+use Dru1x\ExpoPush\PushToken\PushToken;
+use Dru1x\ExpoPush\PushToken\PushTokenCollection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use ValueError;

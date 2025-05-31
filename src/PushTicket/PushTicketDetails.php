@@ -2,7 +2,7 @@
 
 namespace Dru1x\ExpoPush\PushTicket;
 
-use Dru1x\ExpoPush\Data\PushToken;
+use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Traits\ConvertsToJson;
 use JsonSerializable;
 

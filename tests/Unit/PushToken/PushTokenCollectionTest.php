@@ -1,10 +1,9 @@
 <?php
 
-namespace Collections;
+namespace Dru1x\ExpoPush\Tests\Unit\PushToken;
 
-use Dru1x\ExpoPush\Collections\PushTokenCollection;
-use Dru1x\ExpoPush\Data\PushToken;
-use Dru1x\ExpoPush\Enums\PushStatus;
+use Dru1x\ExpoPush\PushToken\PushToken;
+use Dru1x\ExpoPush\PushToken\PushTokenCollection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

@@ -2,10 +2,10 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushTicket;
 
-use Dru1x\ExpoPush\Data\PushToken;
 use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
 use Dru1x\ExpoPush\PushTicket\PushTicketDetails;
 use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
+use Dru1x\ExpoPush\PushToken\PushToken;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

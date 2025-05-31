@@ -2,7 +2,6 @@
 
 /** @noinspection PhpUnhandledExceptionInspection */
 
-use Dru1x\ExpoPush\Data\PushToken;
 use Dru1x\ExpoPush\Enums\PushStatus;
 use Dru1x\ExpoPush\ExpoPush;
 use Dru1x\ExpoPush\ExpoPushConnector;
@@ -13,6 +12,7 @@ use Dru1x\ExpoPush\PushReceipt\PushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use Dru1x\ExpoPush\PushTicket\PushTicket;
 use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
+use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
 use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
 use PHPUnit\Framework\Attributes\Test;

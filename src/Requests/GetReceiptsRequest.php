@@ -2,12 +2,12 @@
 
 namespace Dru1x\ExpoPush\Requests;
 
-use Dru1x\ExpoPush\Data\PushToken;
 use Dru1x\ExpoPush\Enums\PushStatus;
 use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
+use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Traits\CompressesBody;
 use JsonException;
 use OverflowException;

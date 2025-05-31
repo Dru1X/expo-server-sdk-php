@@ -2,8 +2,8 @@
 
 namespace Dru1x\ExpoPush\PushReceipt;
 
-use Dru1x\ExpoPush\Data\PushToken;
 use Dru1x\ExpoPush\Enums\PushStatus;
+use Dru1x\ExpoPush\PushToken\PushToken;
 
 /**
  * @property-read array{expoPushToken?: PushToken} $details
