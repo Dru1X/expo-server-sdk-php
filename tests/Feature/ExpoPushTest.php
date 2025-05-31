@@ -3,7 +3,6 @@
 /** @noinspection PhpUnhandledExceptionInspection */
 
 use Dru1x\ExpoPush\ExpoPush;
-use Dru1x\ExpoPush\ExpoPushConnector;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
@@ -24,7 +23,6 @@ use Saloon\Http\Faking\MockResponse;
 class ExpoPushTest extends TestCase
 {
     protected MockClient $mockClient;
-    protected ExpoPushConnector $connector;
 
     protected function setUp(): void
     {
@@ -33,8 +31,7 @@ class ExpoPushTest extends TestCase
         MockClient::destroyGlobal();
 
         $this->mockClient = new MockClient();
-        $this->connector  = new ExpoPushConnector()->withMockClient($this->mockClient);
-        $this->service    = new ExpoPush($this->connector);
+        $this->service    = ExpoPush::withMockClient($this->mockClient);
 
         Config::preventStrayRequests();
     }

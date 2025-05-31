@@ -15,12 +15,29 @@ use Dru1x\ExpoPush\Result\GetReceiptsResult;
 use Dru1x\ExpoPush\Result\SendNotificationsResult;
 use Generator;
 use Saloon\Exceptions\InvalidPoolItemException;
+use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Pool;
 use Saloon\Http\Response;
 
 final class ExpoPush
 {
-    public function __construct(protected ExpoPushConnector $connector) {}
+    protected ExpoPushConnector $connector;
+
+    public function __construct(?string $authToken = null)
+    {
+        $this->connector = new ExpoPushConnector($authToken);
+    }
+
+    public static function withMockClient(MockClient $mockClient, ?string $authToken = null): self
+    {
+        $expoPush = new self($authToken);
+
+        $expoPush->connector->withMockClient($mockClient);
+
+        return $expoPush;
+    }
+
+    // Interface ----
 
     /**
      * Send a set of push notifications
