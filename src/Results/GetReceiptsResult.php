@@ -2,8 +2,8 @@
 
 namespace Dru1x\ExpoPush\Results;
 
-use Dru1x\ExpoPush\Collections\PushReceiptCollection;
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
 
 final readonly class GetReceiptsResult extends Result
 {

@@ -2,10 +2,10 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\Results;
 
-use Dru1x\ExpoPush\Collections\PushReceiptCollection;
 use Dru1x\ExpoPush\PushError\PushError;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
 use Dru1x\ExpoPush\Results\GetReceiptsResult;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

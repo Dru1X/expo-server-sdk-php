@@ -2,17 +2,15 @@
 
 namespace Dru1x\ExpoPush\Requests;
 
-use Dru1x\ExpoPush\Collections\PushReceiptCollection;
-use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
-use Dru1x\ExpoPush\Data\FailedPushReceipt;
-use Dru1x\ExpoPush\Data\PushReceipt;
 use Dru1x\ExpoPush\Data\PushToken;
-use Dru1x\ExpoPush\Data\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\Enums\PushStatus;
+use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
+use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\Traits\CompressesBody;
 use JsonException;
 use OverflowException;
-use RuntimeException;
 use Saloon\Contracts\Body\HasBody;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;

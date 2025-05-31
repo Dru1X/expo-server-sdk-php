@@ -4,8 +4,8 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\Requests;
 
-use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
 use Dru1x\ExpoPush\ExpoPushConnector;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
 use OverflowException;
 use PHPUnit\Framework\Attributes\Test;

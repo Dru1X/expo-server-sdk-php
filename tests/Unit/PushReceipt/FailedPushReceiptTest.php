@@ -1,9 +1,9 @@
 <?php
 
-namespace Data;
+namespace Dru1x\ExpoPush\Tests\Unit\PushReceipt;
 
-use Dru1x\ExpoPush\Data\FailedPushReceipt;
 use Dru1x\ExpoPush\Data\PushToken;
+use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Collections;
+namespace Dru1x\ExpoPush\Tests\Unit\PushReceipt;
 
-use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

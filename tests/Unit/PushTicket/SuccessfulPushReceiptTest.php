@@ -2,7 +2,7 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushTicket;
 
-use Dru1x\ExpoPush\Data\SuccessfulPushReceipt;
+use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

@@ -1,12 +1,11 @@
 <?php
 
-namespace Dru1x\ExpoPush\Tests\Unit\Collections;
+namespace Dru1x\ExpoPush\Tests\Unit\PushReceipt;
 
-use Dru1x\ExpoPush\Collections\PushReceiptCollection;
-use Dru1x\ExpoPush\Collections\PushReceiptIdCollection;
-use Dru1x\ExpoPush\Data\PushReceipt;
-use Dru1x\ExpoPush\Data\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\Enums\PushStatus;
+use Dru1x\ExpoPush\PushReceipt\PushReceipt;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
+use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

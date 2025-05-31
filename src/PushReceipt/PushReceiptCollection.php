@@ -1,8 +1,8 @@
 <?php
 
-namespace Dru1x\ExpoPush\Collections;
+namespace Dru1x\ExpoPush\PushReceipt;
 
-use Dru1x\ExpoPush\Data\PushReceipt;
+use Dru1x\ExpoPush\Collections\Collection;
 
 /**
  * A collection of PushReceipt objects

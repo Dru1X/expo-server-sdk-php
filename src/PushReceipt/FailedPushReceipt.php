@@ -1,7 +1,8 @@
 <?php
 
-namespace Dru1x\ExpoPush\Data;
+namespace Dru1x\ExpoPush\PushReceipt;
 
+use Dru1x\ExpoPush\Data\PushToken;
 use Dru1x\ExpoPush\Enums\PushStatus;
 
 /**
