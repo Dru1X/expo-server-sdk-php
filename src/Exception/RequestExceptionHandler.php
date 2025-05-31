@@ -2,9 +2,9 @@
 
 namespace Dru1x\ExpoPush\Exception;
 
-use Dru1x\ExpoPush\Collections\PushErrorCollection;
-use Dru1x\ExpoPush\Data\PushError;
-use Dru1x\ExpoPush\Enums\PushErrorCode;
+use Dru1x\ExpoPush\PushError\PushError;
+use Dru1x\ExpoPush\PushError\PushErrorCode;
+use Dru1x\ExpoPush\PushError\PushErrorCollection;
 use JsonException;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;

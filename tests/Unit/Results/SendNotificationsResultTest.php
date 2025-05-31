@@ -2,10 +2,10 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\Results;
 
-use Dru1x\ExpoPush\Collections\PushErrorCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
-use Dru1x\ExpoPush\Data\PushError;
-use Dru1x\ExpoPush\Enums\PushErrorCode;
+use Dru1x\ExpoPush\PushError\PushError;
+use Dru1x\ExpoPush\PushError\PushErrorCode;
+use Dru1x\ExpoPush\PushError\PushErrorCollection;
 use Dru1x\ExpoPush\Results\SendNotificationsResult;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

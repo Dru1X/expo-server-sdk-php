@@ -4,9 +4,9 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\Exception;
 
-use Dru1x\ExpoPush\Collections\PushErrorCollection;
-use Dru1x\ExpoPush\Enums\PushErrorCode;
 use Dru1x\ExpoPush\Exception\RequestExceptionHandler;
+use Dru1x\ExpoPush\PushError\PushErrorCode;
+use Dru1x\ExpoPush\PushError\PushErrorCollection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Saloon\Exceptions\Request\FatalRequestException;

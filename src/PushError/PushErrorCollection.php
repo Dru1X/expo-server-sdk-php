@@ -1,8 +1,8 @@
 <?php
 
-namespace Dru1x\ExpoPush\Collections;
+namespace Dru1x\ExpoPush\PushError;
 
-use Dru1x\ExpoPush\Data\PushError;
+use Dru1x\ExpoPush\Collections\Collection;
 
 /**
  * A collection of PushError objects

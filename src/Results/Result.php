@@ -2,7 +2,7 @@
 
 namespace Dru1x\ExpoPush\Results;
 
-use Dru1x\ExpoPush\Collections\PushErrorCollection;
+use Dru1x\ExpoPush\PushError\PushErrorCollection;
 
 abstract readonly class Result
 {

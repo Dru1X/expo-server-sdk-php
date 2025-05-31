@@ -1,8 +1,6 @@
 <?php
 
-namespace Dru1x\ExpoPush\Data;
-
-use Dru1x\ExpoPush\Enums\PushErrorCode;
+namespace Dru1x\ExpoPush\PushError;
 
 final readonly class PushError
 {

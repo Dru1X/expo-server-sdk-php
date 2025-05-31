@@ -1,15 +1,12 @@
 <?php
 
-namespace Collections;
+namespace Dru1x\ExpoPush\Tests\Unit\PushError;
 
-use Dru1x\ExpoPush\Collections\PushErrorCollection;
-use Dru1x\ExpoPush\Collections\PushTokenCollection;
-use Dru1x\ExpoPush\Data\PushError;
-use Dru1x\ExpoPush\Data\PushToken;
-use Dru1x\ExpoPush\Enums\PushErrorCode;
+use Dru1x\ExpoPush\PushError\PushError;
+use Dru1x\ExpoPush\PushError\PushErrorCode;
+use Dru1x\ExpoPush\PushError\PushErrorCollection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use ValueError;
 
 class PushErrorCollectionTest extends TestCase
 {
