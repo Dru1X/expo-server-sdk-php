@@ -2,11 +2,11 @@
 
 /** @noinspection PhpUnhandledExceptionInspection */
 
-namespace Dru1x\ExpoPush\Tests\Unit\Exception;
+namespace Dru1x\ExpoPush\Tests\Unit\Request;
 
-use Dru1x\ExpoPush\Exception\RequestExceptionHandler;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\Request\RequestExceptionHandler;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Saloon\Exceptions\Request\FatalRequestException;

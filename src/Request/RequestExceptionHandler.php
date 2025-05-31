@@ -1,6 +1,6 @@
 <?php
 
-namespace Dru1x\ExpoPush\Exception;
+namespace Dru1x\ExpoPush\Request;
 
 use Dru1x\ExpoPush\PushError\PushError;
 use Dru1x\ExpoPush\PushError\PushErrorCode;

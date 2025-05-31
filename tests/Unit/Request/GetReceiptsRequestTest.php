@@ -2,11 +2,11 @@
 
 /** @noinspection PhpUnhandledExceptionInspection */
 
-namespace Dru1x\ExpoPush\Tests\Unit\Requests;
+namespace Dru1x\ExpoPush\Tests\Unit\Request;
 
 use Dru1x\ExpoPush\ExpoPushConnector;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
-use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
+use Dru1x\ExpoPush\Request\GetReceiptsRequest;
 use OverflowException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

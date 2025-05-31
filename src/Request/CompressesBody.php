@@ -1,6 +1,6 @@
 <?php
 
-namespace Dru1x\ExpoPush\Traits;
+namespace Dru1x\ExpoPush\Request;
 
 use Saloon\Enums\PipeOrder;
 use Saloon\Http\PendingRequest;

@@ -2,7 +2,7 @@
 
 /** @noinspection PhpUnhandledExceptionInspection */
 
-namespace Dru1x\ExpoPush\Tests\Unit\Requests;
+namespace Dru1x\ExpoPush\Tests\Unit\Request;
 
 use Dru1x\ExpoPush\ExpoPushConnector;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
@@ -10,7 +10,7 @@ use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
 use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
 use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
 use Dru1x\ExpoPush\PushToken\PushToken;
-use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
+use Dru1x\ExpoPush\Request\SendNotificationsRequest;
 use InvalidArgumentException;
 use OverflowException;
 use PHPUnit\Framework\Attributes\Test;

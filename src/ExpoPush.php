@@ -2,15 +2,15 @@
 
 namespace Dru1x\ExpoPush;
 
-use Dru1x\ExpoPush\Exception\RequestExceptionHandler;
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
-use Dru1x\ExpoPush\Requests\GetReceiptsRequest;
-use Dru1x\ExpoPush\Requests\SendNotificationsRequest;
+use Dru1x\ExpoPush\Request\GetReceiptsRequest;
+use Dru1x\ExpoPush\Request\RequestExceptionHandler;
+use Dru1x\ExpoPush\Request\SendNotificationsRequest;
 use Dru1x\ExpoPush\Results\GetReceiptsResult;
 use Dru1x\ExpoPush\Results\SendNotificationsResult;
 use Generator;

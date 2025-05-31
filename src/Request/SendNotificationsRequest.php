@@ -1,6 +1,6 @@
 <?php
 
-namespace Dru1x\ExpoPush\Requests;
+namespace Dru1x\ExpoPush\Request;
 
 use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
 use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
@@ -10,7 +10,6 @@ use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
 use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Support\PushStatus;
-use Dru1x\ExpoPush\Traits\CompressesBody;
 use InvalidArgumentException;
 use JsonException;
 use OverflowException;
