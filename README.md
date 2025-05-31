@@ -1,6 +1,6 @@
 # Expo Push Server SDK (PHP)
 
-![Tests](https://github.com/dru1x/expo-server-sdk-php/workflows/test/badge.svg)
+![Test Workflow Status](https://github.com/Dru1X/expo-server-sdk-php/workflows/Test/badge.svg)
 
 Server-side library for working with the Expo Push service using PHP 8.4+
 
