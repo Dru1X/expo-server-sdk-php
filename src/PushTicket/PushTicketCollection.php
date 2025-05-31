@@ -2,7 +2,7 @@
 
 namespace Dru1x\ExpoPush\PushTicket;
 
-use Dru1x\ExpoPush\Collections\Collection;
+use Dru1x\ExpoPush\Support\Collection;
 
 /**
  * A collection of PushTicket objects

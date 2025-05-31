@@ -2,9 +2,9 @@
 
 namespace Dru1x\ExpoPush\PushMessage;
 
-use Dru1x\ExpoPush\Collections\Collection;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
+use Dru1x\ExpoPush\Support\Collection;
 use ValueError;
 
 /**

@@ -2,10 +2,10 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushReceipt;
 
-use Dru1x\ExpoPush\Enums\PushStatus;
 use Dru1x\ExpoPush\PushReceipt\PushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
 use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
+use Dru1x\ExpoPush\Support\PushStatus;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

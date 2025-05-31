@@ -2,7 +2,7 @@
 
 namespace Dru1x\ExpoPush\PushToken;
 
-use Dru1x\ExpoPush\Traits\ConvertsToJson;
+use Dru1x\ExpoPush\Support\ConvertsToJson;
 use InvalidArgumentException;
 use JsonSerializable;
 use Stringable;

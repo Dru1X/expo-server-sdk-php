@@ -2,7 +2,7 @@
 
 namespace Dru1x\ExpoPush\PushReceipt;
 
-use Dru1x\ExpoPush\Collections\Collection;
+use Dru1x\ExpoPush\Support\Collection;
 
 /**
  * A collection of PushReceipt objects

@@ -4,7 +4,7 @@ namespace Dru1x\ExpoPush\PushMessage;
 
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
-use Dru1x\ExpoPush\Traits\ConvertsToJson;
+use Dru1x\ExpoPush\Support\ConvertsToJson;
 use JsonSerializable;
 
 final readonly class PushMessage implements JsonSerializable

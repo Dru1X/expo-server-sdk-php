@@ -2,7 +2,7 @@
 
 namespace Dru1x\ExpoPush\PushError;
 
-use Dru1x\ExpoPush\Collections\Collection;
+use Dru1x\ExpoPush\Support\Collection;
 
 /**
  * A collection of PushError objects

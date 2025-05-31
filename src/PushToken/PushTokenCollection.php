@@ -2,7 +2,7 @@
 
 namespace Dru1x\ExpoPush\PushToken;
 
-use Dru1x\ExpoPush\Collections\Collection;
+use Dru1x\ExpoPush\Support\Collection;
 
 /**
  * A collection of PushToken objects

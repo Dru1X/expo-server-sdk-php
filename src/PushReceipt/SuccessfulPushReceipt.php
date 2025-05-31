@@ -2,7 +2,7 @@
 
 namespace Dru1x\ExpoPush\PushReceipt;
 
-use Dru1x\ExpoPush\Enums\PushStatus;
+use Dru1x\ExpoPush\Support\PushStatus;
 
 final readonly class SuccessfulPushReceipt extends PushReceipt
 {

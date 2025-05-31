@@ -2,8 +2,8 @@
 
 namespace Dru1x\ExpoPush\PushTicket;
 
-use Dru1x\ExpoPush\Enums\PushStatus;
 use Dru1x\ExpoPush\PushToken\PushToken;
+use Dru1x\ExpoPush\Support\PushStatus;
 
 final readonly class FailedPushTicket extends PushTicket
 {

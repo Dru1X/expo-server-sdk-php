@@ -1,10 +1,9 @@
 <?php
 
-namespace Dru1x\ExpoPush\Collections;
+namespace Dru1x\ExpoPush\Support;
 
 use ArrayIterator;
 use Countable;
-use Dru1x\ExpoPush\Traits\ConvertsToJson;
 use IteratorAggregate;
 use JsonSerializable;
 use Traversable;
