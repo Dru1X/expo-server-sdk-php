@@ -1,10 +1,9 @@
 <?php
 
-namespace Dru1x\ExpoPush\Data;
+namespace Dru1x\ExpoPush\PushMessage;
 
 use Dru1x\ExpoPush\Collections\PushTokenCollection;
-use Dru1x\ExpoPush\Enums\InterruptionLevel;
-use Dru1x\ExpoPush\Enums\Priority;
+use Dru1x\ExpoPush\Data\PushToken;
 use Dru1x\ExpoPush\Traits\ConvertsToJson;
 use JsonSerializable;
 

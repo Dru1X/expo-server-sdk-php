@@ -1,8 +1,8 @@
 <?php
 
-namespace Dru1x\ExpoPush\Tests\Unit\Data;
+namespace Dru1x\ExpoPush\Tests\Unit\PushMessage;
 
-use Dru1x\ExpoPush\Data\RichContent;
+use Dru1x\ExpoPush\PushMessage\RichContent;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

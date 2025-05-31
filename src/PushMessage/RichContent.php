@@ -1,6 +1,6 @@
 <?php
 
-namespace Dru1x\ExpoPush\Data;
+namespace Dru1x\ExpoPush\PushMessage;
 
 use Dru1x\ExpoPush\Traits\ConvertsToJson;
 use JsonSerializable;

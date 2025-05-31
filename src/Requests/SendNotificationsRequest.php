@@ -2,14 +2,14 @@
 
 namespace Dru1x\ExpoPush\Requests;
 
-use Dru1x\ExpoPush\Collections\PushMessageCollection;
 use Dru1x\ExpoPush\Collections\PushTicketCollection;
 use Dru1x\ExpoPush\Data\FailedPushTicket;
+use Dru1x\ExpoPush\Data\PushTicketDetails;
 use Dru1x\ExpoPush\Data\PushToken;
 use Dru1x\ExpoPush\Data\SuccessfulPushTicket;
-use Dru1x\ExpoPush\Data\PushTicketDetails;
 use Dru1x\ExpoPush\Enums\PushStatus;
 use Dru1x\ExpoPush\Enums\PushTicketErrorCode;
+use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
 use Dru1x\ExpoPush\Traits\CompressesBody;
 use InvalidArgumentException;
 use JsonException;
