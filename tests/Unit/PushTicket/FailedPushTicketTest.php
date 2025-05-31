@@ -1,11 +1,11 @@
 <?php
 
-namespace Data;
+namespace Dru1x\ExpoPush\Tests\Unit\PushTicket;
 
-use Dru1x\ExpoPush\Data\FailedPushTicket;
-use Dru1x\ExpoPush\Data\PushTicketDetails;
 use Dru1x\ExpoPush\Data\PushToken;
-use Dru1x\ExpoPush\Enums\PushTicketErrorCode;
+use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
+use Dru1x\ExpoPush\PushTicket\PushTicketDetails;
+use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

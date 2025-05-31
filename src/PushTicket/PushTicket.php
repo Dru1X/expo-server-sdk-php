@@ -1,7 +1,8 @@
 <?php
 
-namespace Dru1x\ExpoPush\Data;
+namespace Dru1x\ExpoPush\PushTicket;
 
+use Dru1x\ExpoPush\Data\PushToken;
 use Dru1x\ExpoPush\Enums\PushStatus;
 use Dru1x\ExpoPush\Traits\ConvertsToJson;
 use JsonSerializable;

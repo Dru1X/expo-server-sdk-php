@@ -1,6 +1,6 @@
 <?php
 
-namespace Dru1x\ExpoPush\Enums;
+namespace Dru1x\ExpoPush\PushTicket;
 
 enum PushTicketErrorCode: string
 {

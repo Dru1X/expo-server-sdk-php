@@ -1,9 +1,9 @@
 <?php
 
-namespace Data;
+namespace Dru1x\ExpoPush\Tests\Unit\PushTicket;
 
 use Dru1x\ExpoPush\Data\PushToken;
-use Dru1x\ExpoPush\Data\SuccessfulPushTicket;
+use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

@@ -2,8 +2,8 @@
 
 namespace Dru1x\ExpoPush\Results;
 
-use Dru1x\ExpoPush\Collections\PushTicketCollection;
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
 
 final readonly class SendNotificationsResult extends Result
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Dru1x\ExpoPush\Collections;
+namespace Dru1x\ExpoPush\PushTicket;
 
-use Dru1x\ExpoPush\Data\PushTicket;
+use Dru1x\ExpoPush\Collections\Collection;
 
 /**
  * A collection of PushTicket objects
