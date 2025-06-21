@@ -27,6 +27,12 @@ final class PushReceiptCollection extends Collection
      */
     public function getById(string $receiptId): ?PushReceipt
     {
-        return array_find($this->items, fn(PushReceipt $receipt) => $receipt->id === $receiptId);
+        foreach ($this->items as $receipt) {
+            if ($receipt->id === $receiptId) {
+                return $receipt;
+            }
+        }
+
+        return null;
     }
 }

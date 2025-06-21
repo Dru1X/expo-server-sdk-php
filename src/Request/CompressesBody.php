@@ -8,7 +8,7 @@ use Saloon\Repositories\Body\StringBodyRepository;
 
 trait CompressesBody
 {
-    private const int COMPRESSION_THRESHOLD = 1024;
+    private const COMPRESSION_THRESHOLD = 1024;
 
     public function bootCompressesBody(PendingRequest $pendingRequest): void
     {
