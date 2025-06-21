@@ -2,13 +2,13 @@
 
 ![Test Workflow Status](https://github.com/Dru1X/expo-server-sdk-php/workflows/Test/badge.svg)
 
-Server-side library for working with the Expo Push service using PHP 8.4+
+Server-side library for working with the Expo Push service using PHP 8.2+
 
 ## ⚙ Installation
 
 ### Requirements
 
-- [PHP 8.4+](https://php.net/releases)
+- [PHP 8.2+](https://php.net/releases)
 - [PHP Zlib extension](https://www.php.net/manual/en/book.zlib.php)
 
 ### Instructions
