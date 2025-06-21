@@ -22,7 +22,7 @@ final class GetReceiptsRequest extends Request implements HasBody
 {
     use AcceptsJson, HasJsonBody, CompressesBody;
 
-    public const int MAX_RECEIPT_COUNT = 1000;
+    public const MAX_RECEIPT_COUNT = 1000;
 
     protected Method $method = Method::POST;
 

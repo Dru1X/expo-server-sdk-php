@@ -5,9 +5,12 @@ on:
 
 jobs:
   all-tests:
-    name: Run All Tests
+    name: Run All Tests (PHP ${{matrix.php-version}})
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    strategy:
+      matrix:
+        php-version: [8.2, 8.3, 8.4]
 
     steps:
       - name: Checkout code
@@ -19,7 +22,7 @@ jobs:
       - name: Run PHPUnit tests
         uses: php-actions/phpunit@v4
         with:
-          php_version: 8.4
+          php_version: ${{matrix.php-version}}
           php_extensions: json zip xdebug
           configuration: phpunit.xml.dist
           coverage_text: true

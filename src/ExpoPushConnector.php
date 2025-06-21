@@ -13,7 +13,7 @@ final class ExpoPushConnector extends Connector
 {
     use HasRateLimits;
 
-    public const int MAX_CONCURRENT_REQUESTS = 6;
+    public const MAX_CONCURRENT_REQUESTS = 6;
 
     public function __construct(protected ?string $authToken = null, ?RateLimitStore $rateLimitStore = null)
     {

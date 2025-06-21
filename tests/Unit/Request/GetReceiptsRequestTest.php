@@ -27,7 +27,7 @@ class GetReceiptsRequestTest extends TestCase
         MockClient::destroyGlobal();
 
         $this->mockClient = new MockClient();
-        $this->connector  = new ExpoPushConnector()->withMockClient($this->mockClient);
+        $this->connector  = (new ExpoPushConnector())->withMockClient($this->mockClient);
 
         Config::preventStrayRequests();
     }

@@ -25,8 +25,8 @@ final class SendNotificationsRequest extends Request implements HasBody
 {
     use AcceptsJson, HasJsonBody, CompressesBody;
 
-    public const int MAX_NOTIFICATION_COUNT = 100;
-    public const int MAX_MESSAGE_DATA_BYTES = 4096;
+    public const MAX_NOTIFICATION_COUNT = 100;
+    public const MAX_MESSAGE_DATA_BYTES = 4096;
 
     protected Method $method = Method::POST;
 

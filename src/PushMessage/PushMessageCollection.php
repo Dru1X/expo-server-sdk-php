@@ -106,7 +106,7 @@ final class PushMessageCollection extends Collection
         }
 
         // Convert the chunks into PushMessageCollection objects
-        return array_map(fn(array $chunk) => new static(...$chunk), $chunks);
+        return array_map(fn(array $chunk) => new self(...$chunk), $chunks);
     }
 
     /**
