@@ -2,7 +2,6 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushToken;
 
-use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
