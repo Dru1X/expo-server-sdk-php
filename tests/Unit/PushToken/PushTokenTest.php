@@ -2,6 +2,7 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushToken;
 
+use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
@@ -55,5 +56,43 @@ JSON;
 JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $token->toJson());
+    }
+
+    #[Test]
+    public function can_be_constructed_from_a_dictionary(): void
+    {
+        $array = [
+            'value' => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+        ];
+
+        $token = PushToken::fromArray($array);
+
+        $this->assertInstanceOf(PushToken::class, $token);
+        $this->assertSame('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $token->value);
+    }
+
+    #[Test]
+    public function can_be_constructed_from_a_list(): void
+    {
+        $array = [
+            // value
+            'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+        ];
+
+        $token = PushToken::fromArray($array);
+
+        $this->assertInstanceOf(PushToken::class, $token);
+        $this->assertSame('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $token->value);
+    }
+
+    #[Test]
+    public function can_be_constructed_from_json(): void
+    {
+        $json = "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]";
+
+        $token = PushToken::fromJson($json);
+
+        $this->assertInstanceOf(PushToken::class, $token);
+        $this->assertSame('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $token->value);
     }
 }

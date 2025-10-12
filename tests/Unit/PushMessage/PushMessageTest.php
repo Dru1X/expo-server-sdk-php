@@ -113,4 +113,41 @@ JSON;
         $this->assertInstanceOf(PushMessage::class, $message);
         $this->assertSame('This is a test notification', $message->body);
     }
+
+    #[Test]
+    public function can_be_constructed_from_json(): void
+    {
+        $json = <<<JSON
+{
+    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
+    "title": "Test Notification", 
+    "body": "This is a test notification"
+}
+JSON;
+
+        $message = PushMessage::fromJson($json);
+
+        $this->assertInstanceOf(PushMessage::class, $message);
+        $this->assertSame('This is a test notification', $message->body);
+    }
+
+    #[Test]
+    public function multiple_tokens_can_be_constructed_from_json(): void
+    {
+        $json = <<<JSON
+{
+    "to": [
+      "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+      "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]"
+    ], 
+    "title": "Test Notification", 
+    "body": "This is a test notification"
+}
+JSON;
+
+        $message = PushMessage::fromJson($json);
+
+        $this->assertInstanceOf(PushMessage::class, $message);
+        $this->assertInstanceOf(PushTokenCollection::class, $message->to);
+    }
 }

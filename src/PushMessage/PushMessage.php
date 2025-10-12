@@ -5,12 +5,13 @@ namespace Dru1x\ExpoPush\PushMessage;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
 use Dru1x\ExpoPush\Support\ConvertsFromArray;
+use Dru1x\ExpoPush\Support\ConvertsFromJson;
 use Dru1x\ExpoPush\Support\ConvertsToJson;
 use JsonSerializable;
 
 final readonly class PushMessage implements JsonSerializable
 {
-    use ConvertsToJson, ConvertsFromArray;
+    use ConvertsFromJson, ConvertsToJson;
 
     public function __construct(
         public PushTokenCollection|PushToken $to,
@@ -72,5 +73,27 @@ final readonly class PushMessage implements JsonSerializable
         return array_filter(
             get_object_vars($this)
         );
+    }
+
+    /**
+     * Create an object from a JSON string
+     */
+    public static function fromJson(string $json): self
+    {
+        $array = json_decode($json, true);
+
+        // TODO: there's got to be a better way...
+        if(is_array($array['to'])) {
+            $tokens = array_map(
+                fn(string $token) => PushToken::fromJson($token),
+                $array['to'],
+            );
+
+            $array['to'] = new PushTokenCollection(...$tokens);
+        } else {
+            $array['to'] = PushToken::fromJson($array['to']);
+        }
+
+        return self::fromArray($array);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Dru1x\ExpoPush\PushToken;
 
+use Dru1x\ExpoPush\Support\ConvertsFromJson;
 use Dru1x\ExpoPush\Support\ConvertsToJson;
 use InvalidArgumentException;
 use JsonSerializable;
@@ -9,7 +10,7 @@ use Stringable;
 
 final readonly class PushToken implements JsonSerializable, Stringable
 {
-    use ConvertsToJson;
+    use ConvertsFromJson, ConvertsToJson;
 
     public function __construct(public string $value)
     {
@@ -36,5 +37,10 @@ final readonly class PushToken implements JsonSerializable, Stringable
     public function jsonSerialize(): string
     {
         return $this->toString();
+    }
+
+    public static function fromJson(string $json): self
+    {
+        return new self($json);
     }
 }
