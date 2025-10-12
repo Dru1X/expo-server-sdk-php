@@ -78,4 +78,39 @@ JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $message->toJson());
     }
+
+    #[Test]
+    public function can_be_constructed_from_a_dictionary(): void
+    {
+        $array = [
+            'to' => new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            'title' => 'Test Notification',
+            'body' => 'This is a test notification',
+        ];
+
+        $message = PushMessage::fromArray($array);
+
+        $this->assertInstanceOf(PushMessage::class, $message);
+        $this->assertSame('This is a test notification', $message->body);
+    }
+
+    #[Test]
+    public function can_be_constructed_from_a_list(): void
+    {
+        $array = [
+            // to
+            new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            // title
+            'Test Notification',
+            // subtitle
+            null,
+            // body
+            'This is a test notification',
+        ];
+
+        $message = PushMessage::fromArray($array);
+
+        $this->assertInstanceOf(PushMessage::class, $message);
+        $this->assertSame('This is a test notification', $message->body);
+    }
 }
