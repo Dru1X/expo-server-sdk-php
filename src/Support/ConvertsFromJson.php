@@ -11,8 +11,13 @@ trait ConvertsFromJson
      */
     public static function fromJson(string $json): self
     {
-        $array = json_decode($json, true);
+        $array = self::jsonDecode($json);
 
         return self::fromArray($array);
+    }
+
+    public static function jsonDecode(string $json): mixed
+    {
+        return json_decode($json, associative: true, flags: JSON_THROW_ON_ERROR);
     }
 }

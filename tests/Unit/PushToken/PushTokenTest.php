@@ -87,7 +87,7 @@ JSON;
     #[Test]
     public function can_be_constructed_from_json(): void
     {
-        $json = "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]";
+        $json = '"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"';
 
         $token = PushToken::fromJson($json);
 

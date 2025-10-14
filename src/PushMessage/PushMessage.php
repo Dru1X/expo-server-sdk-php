@@ -4,9 +4,9 @@ namespace Dru1x\ExpoPush\PushMessage;
 
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
-use Dru1x\ExpoPush\Support\ConvertsFromArray;
 use Dru1x\ExpoPush\Support\ConvertsFromJson;
 use Dru1x\ExpoPush\Support\ConvertsToJson;
+use InvalidArgumentException;
 use JsonSerializable;
 
 final readonly class PushMessage implements JsonSerializable
@@ -75,25 +75,28 @@ final readonly class PushMessage implements JsonSerializable
         );
     }
 
-    /**
-     * Create an object from a JSON string
-     */
-    public static function fromJson(string $json): self
+    public static function fromArray(array $data): self
     {
-        $array = json_decode($json, true);
-
-        // TODO: there's got to be a better way...
-        if(is_array($array['to'])) {
-            $tokens = array_map(
-                fn(string $token) => PushToken::fromJson($token),
-                $array['to'],
-            );
-
-            $array['to'] = new PushTokenCollection(...$tokens);
-        } else {
-            $array['to'] = PushToken::fromJson($array['to']);
+        if(!isset($data['to']) || !is_array($data['to']) && !is_string($data['to'])) {
+            throw new InvalidArgumentException('A push message requires at least one recipient token');
         }
 
-        return self::fromArray($array);
+        $data['to'] = is_array($data['to'])
+            ? PushTokenCollection::fromArray($data['to'])
+            : PushToken::fromString($data['to']);
+
+        if(isset($data['priority'])) {
+            $data['priority'] = Priority::from($data['priority']);
+        }
+
+        if(isset($data['interruptionLevel'])) {
+            $data['interruptionLevel'] = InterruptionLevel::from($data['interruptionLevel']);
+        }
+
+        if(isset($data['richContent'])) {
+            $data['richContent'] = RichContent::fromArray($data['richContent']);
+        }
+
+        return new self(...$data);
     }
 }
