@@ -16,7 +16,7 @@ final class PushTokenCollection extends Collection
         parent::__construct($pushToken);
     }
 
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         $tokens = array_map(PushToken::fromString(...), $data);
 

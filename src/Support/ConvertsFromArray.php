@@ -7,8 +7,8 @@ trait ConvertsFromArray
     /**
      * Create an object from an array
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
-        return new self(...$data);
+        return new static(...$data);
     }
 }

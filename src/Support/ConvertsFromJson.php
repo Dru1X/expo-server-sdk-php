@@ -9,11 +9,11 @@ trait ConvertsFromJson
     /**
      * Create an object from a JSON string
      */
-    public static function fromJson(string $json): self
+    public static function fromJson(string $json): static
     {
-        $array = self::jsonDecode($json);
+        $array = static::jsonDecode($json);
 
-        return self::fromArray($array);
+        return static::fromArray($array);
     }
 
     public static function jsonDecode(string $json): mixed

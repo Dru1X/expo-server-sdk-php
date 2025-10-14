@@ -18,7 +18,7 @@ use Traversable;
  */
 abstract class Collection implements Countable, IteratorAggregate, JsonSerializable
 {
-    use ConvertsToJson;
+    use ConvertsFromJson, ConvertsToJson;
 
     /**
      * The items contained in the collection

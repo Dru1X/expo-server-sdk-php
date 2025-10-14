@@ -222,4 +222,24 @@ JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
     }
+
+    #[Test]
+    public function can_be_constructed_from_json(): void
+    {
+        $json = <<<JSON
+[
+  "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+  "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
+  "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]"
+]
+JSON;
+
+        $collection = PushTokenCollection::fromJson($json);
+
+        $this->assertInstanceOf(PushTokenCollection::class, $collection);
+
+        foreach ($collection as $token) {
+            $this->assertInstanceOf(PushToken::class, $token);
+        }
+    }
 }
