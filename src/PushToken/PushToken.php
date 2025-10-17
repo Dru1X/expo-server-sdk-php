@@ -5,6 +5,7 @@ namespace Dru1x\ExpoPush\PushToken;
 use Dru1x\ExpoPush\Support\ConvertsFromJson;
 use Dru1x\ExpoPush\Support\ConvertsToJson;
 use InvalidArgumentException;
+use JsonException;
 use JsonSerializable;
 use Stringable;
 
@@ -44,6 +45,9 @@ final readonly class PushToken implements JsonSerializable, Stringable
         return $this->toString();
     }
 
+    /**
+     * @throws JsonException
+     */
     public static function fromJson(?string $json): self
     {
         return self::fromString(
