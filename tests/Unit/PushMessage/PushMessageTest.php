@@ -5,6 +5,8 @@ namespace Dru1x\ExpoPush\Tests\Unit\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
+use InvalidArgumentException;
+use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -135,5 +137,13 @@ JSON;
 
         $this->assertInstanceOf(PushMessage::class, $message);
         $this->assertInstanceOf(PushTokenCollection::class, $message->to);
+    }
+
+    #[Test]
+    public function from_json_with_null_throws_error(): void
+    {
+        $this->expectException(JsonException::class);
+
+        PushMessage::fromJson(null);
     }
 }

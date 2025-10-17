@@ -4,6 +4,7 @@ namespace Dru1x\ExpoPush\Tests\Unit\PushToken;
 
 use Dru1x\ExpoPush\PushToken\PushToken;
 use InvalidArgumentException;
+use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -79,5 +80,13 @@ JSON;
 
         $this->assertInstanceOf(PushToken::class, $token);
         $this->assertSame('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $token->value);
+    }
+
+    #[Test]
+    public function from_json_with_null_returns_instance(): void
+    {
+        $this->expectException(JsonException::class);
+
+        PushToken::fromJson(null);
     }
 }

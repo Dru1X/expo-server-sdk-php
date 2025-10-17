@@ -4,6 +4,7 @@ namespace Dru1x\ExpoPush\Tests\Unit\PushToken;
 
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
+use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -241,5 +242,13 @@ JSON;
         foreach ($collection as $token) {
             $this->assertInstanceOf(PushToken::class, $token);
         }
+    }
+
+    #[Test]
+    public function from_json_with_null_throws_error(): void
+    {
+        $this->expectException(JsonException::class);
+
+        PushTokenCollection::fromJson(null);
     }
 }
