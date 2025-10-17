@@ -11,9 +11,9 @@ trait ConvertsFromJson
      */
     public static function fromJson(string $json): static
     {
-        $array = static::jsonDecode($json);
-
-        return static::fromArray($array);
+        return static::fromArray(
+            static::jsonDecode($json)
+        );
     }
 
     public static function jsonDecode(string $json): mixed

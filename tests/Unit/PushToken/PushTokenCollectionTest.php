@@ -224,7 +224,7 @@ JSON;
     }
 
     #[Test]
-    public function can_be_constructed_from_json(): void
+    public function from_json_returns_instance(): void
     {
         $json = <<<JSON
 [

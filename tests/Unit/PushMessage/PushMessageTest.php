@@ -80,7 +80,7 @@ JSON;
     }
 
     #[Test]
-    public function can_be_constructed_from_a_dictionary(): void
+    public function from_array_with_dictionary_returns_instance(): void
     {
         $array = [
             'to' => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
@@ -99,7 +99,7 @@ JSON;
     }
 
     #[Test]
-    public function can_be_constructed_from_json(): void
+    public function from_json_returns_instance(): void
     {
         $json = <<<JSON
 {
@@ -118,7 +118,7 @@ JSON;
     }
 
     #[Test]
-    public function multiple_tokens_can_be_constructed_from_json(): void
+    public function from_json_with_multiple_tokens_returns_instance(): void
     {
         $json = <<<JSON
 {

@@ -46,6 +46,8 @@ final readonly class PushToken implements JsonSerializable, Stringable
 
     public static function fromJson(string $json): self
     {
-        return self::fromString(self::jsonDecode($json));
+        return self::fromString(
+            self::jsonDecode($json)
+        );
     }
 }
