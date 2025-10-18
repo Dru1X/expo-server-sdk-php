@@ -7,6 +7,7 @@ use Dru1x\ExpoPush\PushToken\PushTokenCollection;
 use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 class PushTokenCollectionTest extends TestCase
 {
@@ -247,7 +248,7 @@ JSON;
     #[Test]
     public function from_json_with_null_throws_error(): void
     {
-        $this->expectException(JsonException::class);
+        $this->expectException(TypeError::class);
 
         PushTokenCollection::fromJson(null);
     }

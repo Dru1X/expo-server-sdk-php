@@ -32,6 +32,16 @@ final readonly class PushToken implements JsonSerializable, Stringable
         return new self($value);
     }
 
+    /**
+     * @throws JsonException
+     */
+    public static function fromJson(string $json): self
+    {
+        return self::fromString(
+            self::jsonDecode($json)
+        );
+    }
+
     // Internals ----
 
     public function __toString(): string
@@ -43,15 +53,5 @@ final readonly class PushToken implements JsonSerializable, Stringable
     public function jsonSerialize(): string
     {
         return $this->toString();
-    }
-
-    /**
-     * @throws JsonException
-     */
-    public static function fromJson(?string $json): self
-    {
-        return self::fromString(
-            self::jsonDecode($json)
-        );
     }
 }

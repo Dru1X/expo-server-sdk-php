@@ -7,6 +7,7 @@ use InvalidArgumentException;
 use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 class PushTokenTest extends TestCase
 {
@@ -83,9 +84,9 @@ JSON;
     }
 
     #[Test]
-    public function from_json_with_null_returns_instance(): void
+    public function from_json_with_null_throws_error(): void
     {
-        $this->expectException(JsonException::class);
+        $this->expectException(TypeError::class);
 
         PushToken::fromJson(null);
     }

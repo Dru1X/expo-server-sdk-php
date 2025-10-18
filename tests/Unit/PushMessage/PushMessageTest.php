@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 class PushMessageTest extends TestCase
 {
@@ -142,7 +143,7 @@ JSON;
     #[Test]
     public function from_json_with_null_throws_error(): void
     {
-        $this->expectException(JsonException::class);
+        $this->expectException(TypeError::class);
 
         PushMessage::fromJson(null);
     }
