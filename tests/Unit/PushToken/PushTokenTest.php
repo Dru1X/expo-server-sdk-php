@@ -4,8 +4,10 @@ namespace Dru1x\ExpoPush\Tests\Unit\PushToken;
 
 use Dru1x\ExpoPush\PushToken\PushToken;
 use InvalidArgumentException;
+use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 class PushTokenTest extends TestCase
 {
@@ -55,5 +57,37 @@ JSON;
 JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $token->toJson());
+    }
+
+    #[Test]
+    public function from_array_with_dictionary_returns_instance(): void
+    {
+        $array = [
+            'value' => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+        ];
+
+        $token = PushToken::fromArray($array);
+
+        $this->assertInstanceOf(PushToken::class, $token);
+        $this->assertSame('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $token->value);
+    }
+
+    #[Test]
+    public function from_json_returns_instance(): void
+    {
+        $json = '"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"';
+
+        $token = PushToken::fromJson($json);
+
+        $this->assertInstanceOf(PushToken::class, $token);
+        $this->assertSame('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $token->value);
+    }
+
+    #[Test]
+    public function from_json_with_null_throws_error(): void
+    {
+        $this->expectException(TypeError::class);
+
+        PushToken::fromJson(null);
     }
 }
