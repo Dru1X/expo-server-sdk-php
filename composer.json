@@ -15,6 +15,11 @@
       "name": "James Drew",
       "email": "james.mcw.drew@gmail.com",
       "role": "Developer"
+    },
+    {
+      "name": "Liam Duckett",
+      "email": "liamduckett2@gmail.com",
+      "role": "Developer"
     }
   ],
   "require": {
