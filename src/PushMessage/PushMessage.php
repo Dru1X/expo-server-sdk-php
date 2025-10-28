@@ -19,7 +19,7 @@ final readonly class PushMessage implements JsonSerializable
         public ?string                       $subtitle = null,
         public ?string                       $body = null,
         public ?int                          $ttl = null,
-        public ?array                        $data = null,
+        public array|object|null             $data = null,
         public ?int                          $expiration = null,
         public ?Priority                     $priority = null,
         public ?string                       $sound = null,
@@ -70,9 +70,11 @@ final readonly class PushMessage implements JsonSerializable
     /** @inheritDoc */
     public function jsonSerialize(): array
     {
-        return array_filter(
-            get_object_vars($this)
-        );
+        $allFields = get_object_vars($this);
+
+        $allFields['data'] = isset($allFields['data'])? (object) $allFields['data'] : null;
+
+        return array_filter($allFields);
     }
 
     public static function fromArray(array $data): self
