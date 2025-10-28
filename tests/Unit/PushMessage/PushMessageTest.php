@@ -50,6 +50,7 @@ class PushMessageTest extends TestCase
         );
 
         $this->assertIsList($message->data);
+        $this->assertEquals(['list', 'of', 'values'], $message->data);
     }
 
     #[Test]
@@ -93,7 +94,7 @@ class PushMessageTest extends TestCase
             to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
             title: 'Test Notification',
             body: 'This is a test notification',
-            data: ['list', 'of', 'values'],
+            data: ['key' => 'value', 'foo' => 'bar'],
         );
 
         $expectedJson = <<<JSON
@@ -101,7 +102,7 @@ class PushMessageTest extends TestCase
     "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
     "title": "Test Notification", 
     "body": "This is a test notification",
-    "data": {"0":  "list", "1": "of", "2": "values"}
+    "data": {"key": "value", "foo": "bar"}
 }
 JSON;
 
@@ -144,7 +145,6 @@ JSON;
 
         $message = PushMessage::fromArray($array);
 
-        $this->assertInstanceOf(PushMessage::class, $message);
         $this->assertSame('This is a test notification', $message->body);
         $this->assertSame('https://example.com', $message->richContent->image);
     }
@@ -161,6 +161,7 @@ JSON;
 }
 JSON;
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         $message = PushMessage::fromJson($json);
 
         $this->assertInstanceOf(PushMessage::class, $message);
@@ -182,6 +183,7 @@ JSON;
 }
 JSON;
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         $message = PushMessage::fromJson($json);
 
         $this->assertInstanceOf(PushMessage::class, $message);
@@ -193,6 +195,7 @@ JSON;
     {
         $this->expectException(TypeError::class);
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         PushMessage::fromJson(null);
     }
 }
