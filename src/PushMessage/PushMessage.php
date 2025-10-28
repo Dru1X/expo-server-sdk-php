@@ -29,8 +29,8 @@ final readonly class PushMessage implements JsonSerializable
         public ?string                       $icon = null,
         public ?RichContent                  $richContent = null,
         public ?string                       $categoryId = null,
-        public bool                          $mutableContent = false,
-        public bool                          $_contentAvailable = false,
+        public ?bool                         $mutableContent = null,
+        public ?bool                         $_contentAvailable = null,
     ) {}
 
     // Helpers ----
@@ -74,7 +74,7 @@ final readonly class PushMessage implements JsonSerializable
 
         $allFields['data'] = isset($allFields['data'])? (object) $allFields['data'] : null;
 
-        return array_filter($allFields);
+        return array_filter($allFields, fn(mixed $value) => !is_null($value));
     }
 
     public static function fromArray(array $data): self
