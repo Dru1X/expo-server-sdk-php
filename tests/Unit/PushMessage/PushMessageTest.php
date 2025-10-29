@@ -5,10 +5,9 @@ namespace Dru1x\ExpoPush\Tests\Unit\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
-use InvalidArgumentException;
-use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use TypeError;
 
 class PushMessageTest extends TestCase
@@ -43,19 +42,67 @@ class PushMessageTest extends TestCase
     }
 
     #[Test]
+    public function instantiates_with_data_list(): void
+    {
+        $message = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            data: ['list', 'of', 'values'],
+        );
+
+        $this->assertIsList($message->data);
+        $this->assertEquals(['list', 'of', 'values'], $message->data);
+    }
+
+    #[Test]
+    public function instantiates_with_data_map(): void
+    {
+        $message = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            data: ['key' => 'value', 'foo' => 'bar'],
+        );
+
+        $this->assertIsArray($message->data);
+        $this->assertArrayHasKey('key', $message->data);
+        $this->assertEquals('value', $message->data['key']);
+        $this->assertArrayHasKey('foo', $message->data);
+        $this->assertEquals('bar', $message->data['foo']);
+    }
+
+    #[Test]
+    public function instantiates_with_data_object(): void
+    {
+        $dataObject = new stdClass();
+        $dataObject->key = 'value';
+        $dataObject->foo = 'bar';
+
+        $message = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            data: $dataObject,
+        );
+
+        $this->assertIsObject($message->data);
+        $this->assertObjectHasProperty('key', $message->data);
+        $this->assertEquals('value', $message->data->key);
+        $this->assertObjectHasProperty('foo', $message->data);
+        $this->assertEquals('bar', $message->data->foo);
+    }
+
+    #[Test]
     public function json_encode_returns_value(): void
     {
         $message = new PushMessage(
             to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
             title: 'Test Notification',
             body: 'This is a test notification',
+            data: ['key' => 'value', 'foo' => 'bar'],
         );
 
         $expectedJson = <<<JSON
 {
     "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
     "title": "Test Notification", 
-    "body": "This is a test notification"
+    "body": "This is a test notification",
+    "data": {"key": "value", "foo": "bar"}
 }
 JSON;
 
@@ -69,13 +116,15 @@ JSON;
             to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
             title: 'Test Notification',
             body: 'This is a test notification',
+            data: ['list', 'of', 'values'],
         );
 
         $expectedJson = <<<JSON
 {
     "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
     "title": "Test Notification", 
-    "body": "This is a test notification"
+    "body": "This is a test notification",
+    "data": {"0":  "list", "1": "of", "2": "values"}
 }
 JSON;
 
@@ -96,7 +145,6 @@ JSON;
 
         $message = PushMessage::fromArray($array);
 
-        $this->assertInstanceOf(PushMessage::class, $message);
         $this->assertSame('This is a test notification', $message->body);
         $this->assertSame('https://example.com', $message->richContent->image);
     }
@@ -113,6 +161,7 @@ JSON;
 }
 JSON;
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         $message = PushMessage::fromJson($json);
 
         $this->assertInstanceOf(PushMessage::class, $message);
@@ -134,6 +183,7 @@ JSON;
 }
 JSON;
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         $message = PushMessage::fromJson($json);
 
         $this->assertInstanceOf(PushMessage::class, $message);
@@ -145,6 +195,7 @@ JSON;
     {
         $this->expectException(TypeError::class);
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         PushMessage::fromJson(null);
     }
 }
