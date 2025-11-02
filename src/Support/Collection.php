@@ -112,6 +112,20 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     }
 
     /**
+     * Filter this collection using the given callback
+     *
+     * @param callable(TValue $item, TKey $key): bool $callback
+     *
+     * @return static
+     */
+    public function filter(callable $callback): static
+    {
+        return new static(
+            ...array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH)
+        );
+    }
+
+    /**
      * Merge a set of collections into a single collection
      *
      * @param static<TKey, TValue> ...$collections

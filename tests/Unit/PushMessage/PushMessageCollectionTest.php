@@ -158,6 +158,43 @@ class PushMessageCollectionTest extends TestCase
     }
 
     #[Test]
+    public function filter_returns_correctly_filtered_collection(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
+            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
+            new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
+            new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
+            new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
+        );
+
+        $filteredCollection = $collection->filter(
+            fn(PushMessage $message) => $message->to->value !== 'ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'
+        );
+
+        $this->assertCount(4, $filteredCollection);
+        $this->assertNotEquals('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]', $filteredCollection->get(3)->to);
+    }
+
+    #[Test]
+    public function filter_does_not_affect_original_collection(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
+            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
+            new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
+            new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
+            new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
+        );
+
+        $collection->filter(
+            fn(PushMessage $message) => $message->to->value !== 'ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'
+        );
+
+        $this->assertCount(5, $collection);
+    }
+
+    #[Test]
     public function get_push_tokens_returns_correctly_ordered_push_token_collection(): void
     {
         $collection = new PushMessageCollection(

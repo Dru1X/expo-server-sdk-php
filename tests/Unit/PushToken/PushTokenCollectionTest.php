@@ -152,6 +152,45 @@ class PushTokenCollectionTest extends TestCase
     }
 
     #[Test]
+    public function filter_returns_correctly_filtered_collection(): void
+    {
+        $collection = new PushTokenCollection(
+            new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+            new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+            new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+            new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+            new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
+        );
+
+        $filteredCollection = $collection->filter(
+            fn(PushToken $token) => $token->value !== 'ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'
+        );
+
+        $this->assertCount(5, $filteredCollection);
+        $this->assertNotEquals('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]', $filteredCollection->get(4)->value);
+    }
+
+    #[Test]
+    public function filter_does_not_affect_original_collection(): void
+    {
+        $collection = new PushTokenCollection(
+            new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+            new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+            new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+            new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+            new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
+        );
+
+        $collection->filter(
+            fn(PushToken $token) => $token->value !== 'ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'
+        );
+
+        $this->assertCount(6, $collection);
+    }
+
+    #[Test]
     public function values_returns_collection_with_consecutive_keys(): void
     {
         $collection = new PushTokenCollection(

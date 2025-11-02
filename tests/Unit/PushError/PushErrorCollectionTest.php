@@ -153,6 +153,37 @@ class PushErrorCollectionTest extends TestCase
     }
 
     #[Test]
+    public function filter_returns_correctly_filtered_collection(): void
+    {
+        $collection = new PushErrorCollection(
+            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
+            new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
+            new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
+            new PushError(code: PushErrorCode::PushTooManyNotifications, message: 'Too many notifications'),
+        );
+
+        $filteredCollection = $collection->filter(fn(PushError $error) => $error->code !== PushErrorCode::Failed);
+
+        $this->assertCount(3, $filteredCollection);
+        $this->assertNotEquals(PushErrorCode::Failed, $filteredCollection->get(0)->code);
+    }
+
+    #[Test]
+    public function filter_does_not_affect_original_collection(): void
+    {
+        $collection = new PushErrorCollection(
+            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
+            new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
+            new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
+            new PushError(code: PushErrorCode::PushTooManyNotifications, message: 'Too many notifications'),
+        );
+
+        $collection->filter(fn(PushError $error) => $error->code !== PushErrorCode::Failed);
+
+        $this->assertCount(4, $collection);
+    }
+
+    #[Test]
     public function values_returns_collection_with_consecutive_keys(): void
     {
         $collection = new PushErrorCollection(
