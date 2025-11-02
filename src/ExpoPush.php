@@ -19,7 +19,7 @@ use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Pool;
 use Saloon\Http\Response;
 
-final class ExpoPush
+class ExpoPush
 {
     protected ExpoPushConnector $connector;
 
