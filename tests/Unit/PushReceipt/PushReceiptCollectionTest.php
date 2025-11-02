@@ -182,6 +182,45 @@ class PushReceiptCollectionTest extends TestCase
     }
 
     #[Test]
+    public function filter_returns_correctly_filtered_collection(): void
+    {
+        $collection = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+            new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+            new SuccessfulPushReceipt(id: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB'),
+            new SuccessfulPushReceipt(id: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC'),
+        );
+
+        $filteredCollection = $collection->filter(
+            fn(SuccessfulPushReceipt $receipt) => $receipt->id !== 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+        );
+
+        $this->assertCount(5, $filteredCollection);
+        $this->assertNotEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $filteredCollection->get(0)->id);
+    }
+
+    #[Test]
+    public function filter_does_not_affect_original_collection(): void
+    {
+        $collection = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+            new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+            new SuccessfulPushReceipt(id: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB'),
+            new SuccessfulPushReceipt(id: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC'),
+        );
+
+        $collection->filter(
+            fn(SuccessfulPushReceipt $receipt) => $receipt->id !== 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+        );
+
+        $this->assertCount(6, $collection);
+    }
+
+    #[Test]
     public function values_returns_collection_with_consecutive_keys(): void
     {
         $collection = new PushReceiptCollection(

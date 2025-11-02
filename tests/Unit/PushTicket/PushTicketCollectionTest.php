@@ -294,6 +294,82 @@ class PushTicketCollectionTest extends TestCase
     }
 
     #[Test]
+    public function filter_returns_correctly_filtered_collection(): void
+    {
+        $collection = new PushTicketCollection(
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            ),
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+                receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+            ),
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+                receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
+            ),
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+                receiptId: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+            ),
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+                receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
+            ),
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
+                receiptId: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
+            ),
+        );
+
+        /** @var Collection<int, SuccessfulPushTicket> $filteredCollection */
+        $filteredCollection = $collection->filter(
+            fn(SuccessfulPushTicket $ticket) => $ticket->receiptId !== 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'
+        );
+
+        $this->assertCount(5, $filteredCollection);
+        $this->assertNotEquals('ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', $filteredCollection->get(2)->receiptId);
+    }
+
+    #[Test]
+    public function filter_does_not_affect_original_collection(): void
+    {
+        $collection = new PushTicketCollection(
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            ),
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+                receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+            ),
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+                receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
+            ),
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+                receiptId: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+            ),
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+                receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
+            ),
+            new SuccessfulPushTicket(
+                token: new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
+                receiptId: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
+            ),
+        );
+
+        $collection->filter(
+            fn(SuccessfulPushTicket $ticket) => $ticket->receiptId !== 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'
+        );
+
+        $this->assertCount(6, $collection);
+    }
+
+    #[Test]
     public function values_returns_collection_with_consecutive_keys(): void
     {
         $collection = new PushTicketCollection(

@@ -143,6 +143,45 @@ class PushReceiptIdCollectionTest extends TestCase
     }
 
     #[Test]
+    public function filter_returns_correctly_filtered_collection(): void
+    {
+        $collection = new PushReceiptIdCollection(
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+            'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
+            'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+            'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
+            'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
+        );
+
+        $filteredCollection = $collection->filter(
+            fn(string $receiptId) => $receiptId !== 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'
+        );
+
+        $this->assertCount(5, $filteredCollection);
+        $this->assertNotEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $filteredCollection->get(1));
+    }
+
+    #[Test]
+    public function filter_does_not_affect_original_collection(): void
+    {
+        $collection = new PushReceiptIdCollection(
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+            'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
+            'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+            'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
+            'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
+        );
+
+        $collection->filter(
+            fn(string $receiptId) => $receiptId !== 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'
+        );
+
+        $this->assertCount(6, $collection);
+    }
+
+    #[Test]
     public function values_returns_collection_with_consecutive_keys(): void
     {
         $collection = new PushReceiptIdCollection(
