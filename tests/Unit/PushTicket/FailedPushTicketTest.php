@@ -6,11 +6,32 @@ use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
 use Dru1x\ExpoPush\PushTicket\PushTicketDetails;
 use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
 use Dru1x\ExpoPush\PushToken\PushToken;
+use Dru1x\ExpoPush\Support\PushStatus;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class FailedPushTicketTest extends TestCase
 {
+    #[Test]
+    public function properties_are_accessible(): void
+    {
+        $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
+
+        $message = '"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]" is not a registered push notification recipient';
+
+        $details = new PushTicketDetails(
+            error: PushTicketErrorCode::DeviceNotRegistered,
+            expoPushToken: $token,
+        );
+
+        $ticket = new FailedPushTicket($token, $message, $details);
+
+        $this->assertEquals($token, $ticket->token);
+        $this->assertEquals($message, $ticket->message);
+        $this->assertEquals($details, $ticket->details);
+        $this->assertEquals(PushStatus::Error, $ticket->status);
+    }
+
     #[Test]
     public function json_encode_returns_value(): void
     {
