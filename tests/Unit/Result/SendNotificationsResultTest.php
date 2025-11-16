@@ -44,7 +44,7 @@ class SendNotificationsResultTest extends TestCase
     {
         $result = new SendNotificationsResult(
             tickets: new PushTicketCollection(),
-            errors: null
+            errors: new PushErrorCollection(),
         );
 
         $this->assertFalse($result->hasErrors());

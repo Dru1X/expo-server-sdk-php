@@ -44,7 +44,7 @@ class GetReceiptsResultTest extends TestCase
     {
         $result = new GetReceiptsResult(
             receipts: new PushReceiptCollection(),
-            errors: null
+            errors: new PushErrorCollection(),
         );
 
         $this->assertFalse($result->hasErrors());
