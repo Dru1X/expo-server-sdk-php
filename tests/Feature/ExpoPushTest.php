@@ -171,6 +171,34 @@ class ExpoPushTest extends TestCase
     }
 
     #[Test]
+    public function send_notification_handles_single_push_message(): void
+    {
+        $message = $this->generatePushMessage();
+
+        $responseBody = [
+            'data' => [
+                [
+                    'status' => 'ok',
+                    'id'     => $this->generatePushReceiptId(),
+                ],
+            ],
+        ];
+
+        $this->mockClient->addResponse(
+            MockResponse::make(
+                body: $responseBody,
+                headers: ['Content-Type' => 'application/json']
+            )
+        );
+
+        $result = $this->service->sendNotification($message);
+
+        $this->mockClient->assertSentCount(1, SendNotificationsRequest::class);
+
+        $this->assertCount(1, $result->tickets);
+    }
+
+    #[Test]
     public function send_notifications_leaves_index_gaps_for_request_errors(): void
     {
         $messages = $this->generatePushMessages(1000);
@@ -468,18 +496,23 @@ class ExpoPushTest extends TestCase
 
     // Helpers ----
 
+    protected function generatePushMessage(): PushMessage
+    {
+        $tokenValue = bin2hex(random_bytes(11));
+
+        return new PushMessage(
+            to: new PushToken("ExponentPushToken[$tokenValue]"),
+            title: "Test Notification",
+            body: "A simple test push notification",
+        );
+    }
+
     protected function generatePushMessages(int $count): PushMessageCollection
     {
         $messages = [];
 
         for ($i = 0; $i < $count; $i++) {
-            $tokenValue = bin2hex(random_bytes(11));
-
-            $messages[] = new PushMessage(
-                to: new PushToken("ExponentPushToken[$tokenValue]"),
-                title: "Test Notification $i",
-                body: "A simple test push notification"
-            );
+            $messages[] = $this->generatePushMessage();
         }
 
         return new PushMessageCollection(...$messages);

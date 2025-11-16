@@ -91,6 +91,19 @@ class ExpoPush
     }
 
     /**
+     * Send a single push notification
+     *
+     * @param PushMessage $pushMessage
+     *
+     * @return SendNotificationsResult
+     * @throws InvalidPoolItemException
+     */
+    public function sendNotification(PushMessage $pushMessage): SendNotificationsResult
+    {
+        return $this->sendNotifications([$pushMessage]);
+    }
+
+    /**
      * Get available push receipts with the given IDs
      *
      * This supports request concurrency, with up to 6 requests being sent at once
