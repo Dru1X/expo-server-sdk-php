@@ -12,6 +12,6 @@ abstract readonly class Result
 
     public function hasErrors(): bool
     {
-        return (bool)$this->errors?->count();
+        return (bool)$this->errors->count();
     }
 }
