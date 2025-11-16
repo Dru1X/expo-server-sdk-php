@@ -8,7 +8,7 @@ use Dru1x\ExpoPush\Support\Result;
 
 final readonly class GetReceiptsResult extends Result
 {
-    public function __construct(public PushReceiptCollection $receipts, ?PushErrorCollection $errors = null)
+    public function __construct(public PushReceiptCollection $receipts, PushErrorCollection $errors)
     {
         parent::__construct($errors);
     }

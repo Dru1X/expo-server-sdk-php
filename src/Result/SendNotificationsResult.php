@@ -8,7 +8,7 @@ use Dru1x\ExpoPush\Support\Result;
 
 final readonly class SendNotificationsResult extends Result
 {
-    public function __construct(public PushTicketCollection $tickets, ?PushErrorCollection $errors = null)
+    public function __construct(public PushTicketCollection $tickets, PushErrorCollection $errors)
     {
         parent::__construct($errors);
     }
