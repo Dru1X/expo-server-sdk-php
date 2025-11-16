@@ -91,7 +91,7 @@ class ExpoPush
     }
 
     /**
-     * Send a single push notifications
+     * Send a single push notification
      *
      * @param PushMessage $pushMessage
      *
