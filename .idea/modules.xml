@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/expo-server-sdk-php.iml" filepath="$PROJECT_DIR$/.idea/expo-server-sdk-php.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Expo Server SDK.iml" filepath="$PROJECT_DIR$/.idea/Expo Server SDK.iml" />
     </modules>
   </component>
 </project>
