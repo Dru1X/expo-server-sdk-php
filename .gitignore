@@ -109,3 +109,4 @@ fabric.properties
 
 ### Project
 /vendor/
+composer.lock
