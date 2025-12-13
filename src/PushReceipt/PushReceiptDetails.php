@@ -12,6 +12,7 @@ final readonly class PushReceiptDetails implements JsonSerializable
     use ConvertsToJson;
 
     public function __construct(
+        public PushReceiptErrorCode $error,
         public ?PushToken $expoPushToken,
     ) {}
 }

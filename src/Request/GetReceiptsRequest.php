@@ -5,6 +5,7 @@ namespace Dru1x\ExpoPush\Request;
 use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptDetails;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptErrorCode;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\PushToken\PushToken;
@@ -95,12 +96,14 @@ final class GetReceiptsRequest extends Request implements HasBody
      */
     protected function makeFailedPushReceipt(string $id, array $data): FailedPushReceipt
     {
+        $detailsError = $data['details']['error'] ?? null;
         $detailsToken = $data['details']['expoPushToken'] ?? null;
 
         return new FailedPushReceipt(
             id: $id,
             message: $data['message'],
             details: new PushReceiptDetails(
+                error: PushReceiptErrorCode::tryFrom($detailsError) ?? PushReceiptErrorCode::Unknown,
                 expoPushToken: $detailsToken ? new PushToken($detailsToken) : null,
             ),
         );
