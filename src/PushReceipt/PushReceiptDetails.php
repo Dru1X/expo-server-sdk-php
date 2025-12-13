@@ -2,7 +2,6 @@
 
 namespace Dru1x\ExpoPush\PushReceipt;
 
-use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Support\ConvertsToJson;
 use JsonSerializable;
