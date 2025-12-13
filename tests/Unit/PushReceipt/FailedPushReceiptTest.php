@@ -3,6 +3,7 @@
 namespace Dru1x\ExpoPush\Tests\Unit\PushReceipt;
 
 use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptDetails;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -17,9 +18,7 @@ class FailedPushReceiptTest extends TestCase
         $ticket = new FailedPushReceipt(
             id:'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             message: '"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]" is not a registered push notification recipient',
-            details: [
-                'expoPushToken' => $token,
-            ]
+            details: new PushReceiptDetails(expoPushToken: $token),
         );
 
         $expectedJson = <<<JSON
@@ -44,9 +43,7 @@ JSON;
         $ticket = new FailedPushReceipt(
             id:'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             message: '"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]" is not a registered push notification recipient',
-            details: [
-                'expoPushToken' => $token,
-            ]
+            details: new PushReceiptDetails(expoPushToken: $token),
         );
 
         $expectedJson = <<<JSON
