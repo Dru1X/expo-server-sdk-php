@@ -100,7 +100,7 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     /**
      * Break this collection into a set of smaller chunks
      *
-     * @param int $size
+     * @param int<1, max> $size
      *
      * @return array<array-key, static<TKey, TValue>>
      */
