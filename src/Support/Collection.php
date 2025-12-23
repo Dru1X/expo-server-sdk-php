@@ -102,7 +102,7 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
      *
      * @param int<1, max> $size
      *
-     * @return array<array-key, static<TKey, TValue>>
+     * @return list<static<TKey, TValue>>
      */
     public function chunk(int $size): array
     {
