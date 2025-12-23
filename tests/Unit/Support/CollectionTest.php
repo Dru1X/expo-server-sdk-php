@@ -28,6 +28,26 @@ class CollectionTest extends TestCase
         ], $result);
     }
 
+    #[Test]
+    #[DataProvider('collectionsProvider')]
+    public function can_reduce(callable $factory): void
+    {
+        $result = $factory([1, 2, 3, 4, 5])->reduce(fn(int $carry, int $item) => $carry + $item, 0);
+
+        $this->assertSame(15, $result);
+    }
+
+    #[Test]
+    #[DataProvider('collectionsProvider')]
+    public function can_sum(callable $factory): void
+    {
+        $resultOne = $factory([1, 2, 3, 4, 5])->sum(fn(int $item) => $item * 2);
+        $resultTwo = $factory([1, 2, 3, 4, 5])->sum();
+
+        $this->assertSame(30, $resultOne);
+        $this->assertSame(15, $resultTwo);
+    }
+
     public static function collectionsProvider(): array
     {
         return [

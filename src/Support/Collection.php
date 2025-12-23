@@ -144,6 +144,34 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     }
 
     /**
+     * Reduce the collection to a single value.
+     *
+     * @template TReduceReturnType
+     *
+     * @param  callable(TReduceReturnType, TValue): TReduceReturnType  $callback
+     * @param  TReduceReturnType  $initial
+     * @return TReduceReturnType
+     */
+    public function reduce(callable $callback, mixed $initial = null)
+    {
+        return array_reduce($this->items, $callback, $initial);
+    }
+
+    /**
+     * Get the sum of the given values.
+     *
+     * @template TReturnType of array|float|int
+     *
+     * @param  callable(TValue): TReturnType $callback
+     * @param TReturnType $initial
+     * @return TReturnType
+     */
+    public function sum(callable $callback, array|float|int $initial = 0): mixed
+    {
+        return $this->reduce(fn ($carry, $item) => $carry + $callback($item), $initial);
+    }
+
+    /**
      * Get a new collection with the keys reset to consecutive integers
      *
      * @return static<TKey, TValue>
