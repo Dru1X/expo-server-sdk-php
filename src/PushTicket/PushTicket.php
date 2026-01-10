@@ -16,6 +16,18 @@ abstract readonly class PushTicket implements JsonSerializable
         public PushStatus $status,
     ) {}
 
+    // Helpers ----
+
+    public function isSuccessful(): bool
+    {
+        return $this->status === PushStatus::Ok;
+    }
+
+    public function isFailed(): bool
+    {
+        return $this->status === PushStatus::Error;
+    }
+
     // Internals ----
 
     /** @inheritDoc */
