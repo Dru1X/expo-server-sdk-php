@@ -3,7 +3,6 @@
 namespace Dru1x\ExpoPush\Result;
 
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
-use Dru1x\ExpoPush\PushTicket\PushTicket;
 use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
 use Dru1x\ExpoPush\Support\Result;
 
@@ -21,15 +20,23 @@ final readonly class SendNotificationsResult extends Result
 
     public function hasSuccessfulTickets(): bool
     {
-        $successfulTickets = $this->tickets->filter(fn(PushTicket $ticket) => $ticket->isSuccessful());
+        foreach ($this->tickets as $ticket) {
+            if ($ticket->isSuccessful()) {
+                return true;
+            }
+        }
 
-        return $successfulTickets->count() > 0;
+        return false;
     }
 
     public function hasFailedTickets(): bool
     {
-        $successfulTickets = $this->tickets->filter(fn(PushTicket $ticket) => $ticket->isFailed());
+        foreach ($this->tickets as $ticket) {
+            if ($ticket->isFailed()) {
+                return true;
+            }
+        }
 
-        return $successfulTickets->count() > 0;
+        return false;
     }
 }

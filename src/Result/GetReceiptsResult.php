@@ -3,7 +3,6 @@
 namespace Dru1x\ExpoPush\Result;
 
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
-use Dru1x\ExpoPush\PushReceipt\PushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
 use Dru1x\ExpoPush\Support\Result;
 
@@ -21,15 +20,23 @@ final readonly class GetReceiptsResult extends Result
 
     public function hasSuccessfulReceipts(): bool
     {
-        $successfulReceipts = $this->receipts->filter(fn(PushReceipt $receipt) => $receipt->isSuccessful());
+        foreach ($this->receipts as $receipt) {
+            if ($receipt->isSuccessful()) {
+                return true;
+            }
+        }
 
-        return $successfulReceipts->count() > 0;
+        return false;
     }
 
     public function hasFailedReceipts(): bool
     {
-        $successfulReceipts = $this->receipts->filter(fn(PushReceipt $receipt) => $receipt->isFailed());
+        foreach ($this->receipts as $receipt) {
+            if ($receipt->isFailed()) {
+                return true;
+            }
+        }
 
-        return $successfulReceipts->count() > 0;
+        return false;
     }
 }
