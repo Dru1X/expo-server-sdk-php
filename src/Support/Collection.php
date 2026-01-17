@@ -11,12 +11,13 @@ use Traversable;
 /**
  * An abstract collection class with some useful helpers
  *
+ * TODO: make it just int? separate data structure for dictionary!
  * @template TKey of array-key
  * @template TValue
  *
- * @template-implements IteratorAggregate<TKey, TValue>
+ * @template-implements IteratorAggregate<int, TValue>
  */
-abstract class Collection implements Countable, IteratorAggregate, JsonSerializable
+class Collection implements Countable, IteratorAggregate, JsonSerializable
 {
     use ConvertsFromJson, ConvertsToJson;
 
@@ -28,11 +29,21 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     protected array $items;
 
     /**
-     * @param array<TKey, TValue> $items
+     * @param iterable<TKey, TValue> $items
      */
-    public function __construct(array $items)
+    public function __construct(iterable $items)
     {
-        $this->items = $items;
+        $this->items = iterator_to_array($items);
+    }
+
+    /**
+     * @param iterable<TKey, TValue> $items
+     *
+     * @return static<TKey, TValue>
+     */
+    public static function make(iterable $items = []): static
+    {
+        return new static($items);
     }
 
     // Helpers ----
@@ -62,7 +73,7 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     /**
      * Get an item from this collection by its key
      *
-     * @param int|string $index
+     * @param TKey $index
      *
      * @return TValue|null
      */
@@ -76,25 +87,28 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
      *
      * @param TValue $item
      *
-     * @return void
+     * @return $this
      */
-    public function add(mixed $item): void
+    public function add(mixed $item): static
     {
         $this->items[] = $item;
+
+        return $this;
     }
 
     /**
-     * Upsert an item to this collection at a specific index
+     * Add an item to this collection at a specific index
      *
-     * @param int   $index
-     * @param mixed $item
+     * @param TKey $index
+     * @param TValue $item
      *
-     * @return void
+     * @return $this
      */
-    public function set(int $index, mixed $item): void
+    public function set(int|string $index, mixed $item): static
     {
         $this->items[$index] = $item;
 
+        return $this;
     }
 
     /**
@@ -102,26 +116,30 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
      *
      * @param int<1, max> $size
      *
-     * @return list<static<TKey, TValue>>
+     * @return static<int, <static>>
      */
-    public function chunk(int $size): array
+    public function chunk(int $size, bool $preserveKeys = false): static
     {
-        $chunks = array_chunk($this->items, $size);
+        $chunks = array_chunk($this->items, $size, $preserveKeys);
 
-        return array_map(fn(array $chunk) => new static(...$chunk), $chunks);
+        return new static(
+            array_map(fn(array $chunk) => new static($chunk), $chunks)
+        );
     }
 
     /**
      * Filter this collection using the given callback
      *
-     * @param callable(TValue $item, TKey $key): bool $callback
+     * @param ?callable(TValue, TKey): bool $callable
      *
      * @return static
      */
-    public function filter(callable $callback): static
+    public function filter(?callable $callable): static
     {
+        $callable ??= fn(mixed $item) => $item;
+
         return new static(
-            ...array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH)
+            array_filter($this->items, $callable, ARRAY_FILTER_USE_BOTH)
         );
     }
 
@@ -162,13 +180,15 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
      *
      * @template TReturnType of array|float|int
      *
-     * @param  callable(TValue): TReturnType $callback
+     * @param  (callable(TValue): TReturnType)|null $callable
      * @param TReturnType $initial
-     * @return TReturnType
+     * @return ($callable is callable ? TReturnType : TValue)
      */
-    public function sum(callable $callback, array|float|int $initial = 0): mixed
+    public function sum(?callable $callable = null, mixed $initial = 0): mixed
     {
-        return $this->reduce(fn ($carry, $item) => $carry + $callback($item), $initial);
+        $callable ??= fn(mixed $item) => $item;
+
+        return $this->reduce(fn ($carry, $item) => $carry + $callable($item), $initial);
     }
 
     /**
@@ -186,9 +206,33 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
      *
      * @return array<TKey, TValue>
      */
-    public function toArray(): array
+    public function all(): array
     {
         return $this->items;
+    }
+
+    /**
+     * Recursively convert this collection to an array
+     *
+     * @return array<TKey, TValue>
+     */
+    public function toArray(): array
+    {
+        return $this->map(fn (mixed $value) => is_iterable($value) ? $value->toArray() : $value)->all();
+    }
+
+    /**
+     * @template TMap of mixed
+     *
+     * @param callable(TValue, TKey): TMap $callable
+     *
+     * @return static<TKey, TMap>
+     */
+    public function map(callable $callable): static
+    {
+        return static::make(
+            array_map(fn(mixed $item) => $callable($item), $this->items)
+        );
     }
 
     // Internals ----

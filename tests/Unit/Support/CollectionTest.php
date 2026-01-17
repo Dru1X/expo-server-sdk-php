@@ -2,11 +2,7 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\Support;
 
-use Dru1x\ExpoPush\PushError\PushError;
-use Dru1x\ExpoPush\PushError\PushErrorCode;
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
-use Dru1x\ExpoPush\Result\GetReceiptsResult;
+use ArrayIterator;
 use Dru1x\ExpoPush\Support\Collection;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -16,44 +12,82 @@ use PHPUnit\Framework\TestCase;
 class CollectionTest extends TestCase
 {
     #[Test]
-    #[DataProvider('collectionsProvider')]
-    public function can_chunk(callable $factory): void
+    #[DataProvider('constructProvider')]
+    public function can_construct(iterable $data): void
     {
-        $result = $factory([1, 2, 3, 4, 5])->chunk(2);
-
-        $this->assertCollection([
-            [0 => 1, 1 => 2],
-            [0 => 3, 1 => 4],
-            [0 => 5],
-        ], $result);
+        $this->assertCollection(
+            [1, 2],
+            Collection::make($data),
+        );
     }
 
     #[Test]
-    #[DataProvider('collectionsProvider')]
-    public function can_reduce(callable $factory): void
+    public function can_count(): void
     {
-        $result = $factory([1, 2, 3, 4, 5])->reduce(fn(int $carry, int $item) => $carry + $item, 0);
-
-        $this->assertSame(15, $result);
+        $this->assertCount(
+            2,
+            Collection::make([1, 2]),
+        );
     }
 
     #[Test]
-    #[DataProvider('collectionsProvider')]
-    public function can_sum(callable $factory): void
+    #[DataProvider('containsProvider')]
+    public function can_contains(mixed $item, bool $expected): void
     {
-        $resultOne = $factory([1, 2, 3, 4, 5])->sum(fn(int $item) => $item * 2);
-        $resultTwo = $factory([1, 2, 3, 4, 5])->sum();
-
-        $this->assertSame(30, $resultOne);
-        $this->assertSame(15, $resultTwo);
+        $this->assertSame(
+            $expected,
+            Collection::make([1, 2])->contains($item),
+        );
     }
 
-    public static function collectionsProvider(): array
+    #[Test]
+    #[DataProvider('getProvider')]
+    public function can_get(int|string $key, mixed $value): void
     {
-        return [
-            'array collection' => [fn(array $items) => self::collection($items)],
-            'variadic collection' => [fn(array $items) => self::variadicCollection($items)],
-        ];
+        $this->assertSame(
+            $value,
+            Collection::make([1, 2, 3, 'foo' => 4, 5])->get($key),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('addProvider')]
+    public function can_add(array $existing, mixed $value, array $result): void
+    {
+        $this->assertCollection(
+            $result,
+            Collection::make($existing)->add($value),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('setProvider')]
+    public function can_set(int|string $key, mixed $value): void
+    {
+        $this->assertCollection(
+            [$key => $value],
+            Collection::make()->set($key, $value),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('chunkProvider')]
+    public function can_chunk(array $items, bool $preserverKeys, array $expected): void
+    {
+        $this->assertCollection(
+            $expected,
+            Collection::make($items)->chunk(2, $preserverKeys),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('filterProvider')]
+    public function can_filter(array $items, ?callable $callable, array $expected): void
+    {
+        $this->assertCollection(
+            $expected,
+            Collection::make($items)->filter($callable),
+        );
     }
 
     protected function assertCollection(array $expected, Collection $actual): void
@@ -64,19 +98,69 @@ class CollectionTest extends TestCase
         );
     }
 
-    protected static function collection(array $items): Collection
+    public static function constructProvider(): array
     {
-        return new class($items) extends Collection {};
+        return [
+            'array' => [[1, 2]],
+            'iterable' => [new ArrayIterator([1, 2])],
+            'generator' => [(function() {
+                foreach([1, 2] as $item) {
+                    yield $item;
+                }
+            })()],
+        ];
     }
 
-    protected static function variadicCollection(array $numbers): Collection
+    public static function containsProvider(): array
     {
-        return new class(...$numbers) extends Collection
-        {
-            public function __construct(int ...$number)
-            {
-                parent::__construct($number);
-            }
-        };
+        return [
+            'does' => [2, true],
+            'doesnt' => [3, false],
+            'doesnt loose' => ['2', false],
+        ];
+    }
+
+    public static function getProvider(): array
+    {
+        return [
+            'integer key present' => [2, 3],
+            'integer key not present' => [5, null],
+            'string key present' => ['foo', 4],
+            'string key not present' => ['bar', null],
+        ];
+    }
+
+    public static function addProvider(): array
+    {
+        return [
+            'list' => [[1, 2], 3, [1, 2, 3]],
+            'integer dictionary' => [[3 => 'foo', 1 => 'bar'], 'baz', [3 => 'foo', 1 => 'bar', 4 => 'baz']],
+            'string dictionary' => [['foo' => 1, 'bar' => 2], 3, ['foo' => 1, 'bar' => 2, 0 => 3]],
+        ];
+    }
+
+    public static function setProvider(): array
+    {
+        return [
+            'integer key' => [2, 3],
+            'string key' => ['foo', 4],
+        ];
+    }
+
+    public static function chunkProvider(): array
+    {
+        return [
+            'dont preserve keys' => [[1, 2, 3], false, [[1, 2], [3]]],
+            'preserve keys' => [[1, 2, 3], true, [[1, 2], [2 => 3]]],
+        ];
+    }
+
+    public static function filterProvider(): array
+    {
+        return [
+            'passing callable' => [[1, 2, 3, 4, 5], fn(int $number) => $number % 2, [0 => 1, 2 => 3, 4 => 5]],
+            'without passing callable' => [[0, 1, '', null, false, ' '], null, [1 => 1, 5 => ' ']],
+            'using key' => [[1, 2, 3, 4, 5], fn(int $_, int $key) => $key % 2, [1 => 2, 3 => 4]],
+        ];
     }
 }
