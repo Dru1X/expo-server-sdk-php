@@ -90,6 +90,16 @@ class CollectionTest extends TestCase
         );
     }
 
+    #[Test]
+    #[DataProvider('mergeProvider')]
+    public function can_merge(array $toMerge, array $expected): void
+    {
+        $this->assertCollection(
+            $expected,
+            Collection::make([1, 2])->merge(...$toMerge),
+        );
+    }
+
     protected function assertCollection(array $expected, Collection $actual): void
     {
         self::assertThat(
@@ -161,6 +171,15 @@ class CollectionTest extends TestCase
             'passing callable' => [[1, 2, 3, 4, 5], fn(int $number) => $number % 2, [0 => 1, 2 => 3, 4 => 5]],
             'without passing callable' => [[0, 1, '', null, false, ' '], null, [1 => 1, 5 => ' ']],
             'using key' => [[1, 2, 3, 4, 5], fn(int $_, int $key) => $key % 2, [1 => 2, 3 => 4]],
+        ];
+    }
+
+    public static function mergeProvider(): array
+    {
+        return [
+            'single' => [[[3, 4]], [1, 2, 3, 4]],
+            'multiple' => [[[3, 4], [5, 6]], [1, 2, 3, 4, 5, 6]],
+            'iterables' => [[new ArrayIterator([3, 4]), new ArrayIterator([5, 6])], [1, 2, 3, 4, 5, 6]],
         ];
     }
 }

@@ -144,21 +144,22 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     }
 
     /**
-     * Merge a set of collections into a single collection
+     * Merge a set of iterables into a single collection
      *
-     * @param static<TKey, TValue> ...$collections
+     * @param iterable<TKey, TValue> ...$iterables
      *
      * @return static<TKey, TValue>
      */
-    public function merge(self ...$collections): static
+    public function merge(iterable ...$iterables): static
     {
-        $items = array_reduce(
-            $collections,
-            fn(array $carry, self $collection) => array_merge($carry, $collection->items),
-            $this->items
+        $arrays = array_map(
+            fn(iterable $iterator) => iterator_to_array($iterator),
+            $iterables,
         );
 
-        return new static(...$items);
+        return new static(
+            array_merge($this->items, ...$arrays),
+        );
     }
 
     /**
@@ -218,7 +219,7 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
      */
     public function toArray(): array
     {
-        return $this->map(fn (mixed $value) => is_iterable($value) ? $value->toArray() : $value)->all();
+        return $this->map(fn (mixed $value) => $value instanceof self ? $value->toArray() : $value)->all();
     }
 
     /**
@@ -240,7 +241,7 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     /**
      * @return ArrayIterator<TKey, TValue>
      */
-    public function getIterator(): Traversable
+    public function getIterator(): ArrayIterator
     {
         return new ArrayIterator($this->items);
     }
