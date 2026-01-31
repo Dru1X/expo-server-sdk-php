@@ -181,11 +181,11 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     /**
      * Reduce the collection to a single value.
      *
-     * @template TReduceReturnType
+     * @template TReturnType
      *
-     * @param  callable(TReduceReturnType, TValue): TReduceReturnType  $callback
-     * @param  TReduceReturnType  $initial
-     * @return TReduceReturnType
+     * @param  callable(TReturnType, TValue): TReturnType  $callback
+     * @param  TReturnType  $initial
+     * @return TReturnType
      */
     public function reduce(callable $callback, mixed $initial = null)
     {
