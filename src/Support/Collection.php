@@ -7,37 +7,42 @@ use Countable;
 use IteratorAggregate;
 use JsonSerializable;
 
+use function PHPStan\dumpType;
+
 /**
  * An abstract collection class with some useful helpers
  *
+ * @template TKey of array-key
  * @template TValue
  *
- * @template-implements IteratorAggregate<int, TValue>
+ * @template-implements IteratorAggregate<TKey, TValue>
  *
  * @phpstan-consistent-constructor
  */
-abstract class Collection implements Countable, IteratorAggregate, JsonSerializable
+class Collection implements Countable, IteratorAggregate, JsonSerializable
 {
     use ConvertsFromJson, ConvertsToJson;
 
     /**
      * The items contained in the collection
      *
-     * @var list<TValue>
+     * @var array<TKey, TValue>
      */
     protected array $items;
 
     /**
-     * @param iterable<int, TValue> $iterable
+     * @template TNewKey of array-key
+     * @template TNewValue
      *
-     * @return static<TValue>
+     * @param iterable<TNewKey, TNewValue> $iterable
+     *
+     * @return static<TNewKey, TNewValue>
      */
     public static function fromIterable(iterable $iterable = []): static
     {
-        $array = iterator_to_array($iterable);
-        $list = array_values($array);
-
-        return new static($list);
+        return new static(
+            iterator_to_array($iterable)
+        );
     }
 
     // Helpers ----
@@ -65,6 +70,18 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     }
 
     /**
+     * Get an item from this collection by its key
+     *
+     * @param TKey $index
+     *
+     * @return TValue|null
+     */
+    public function get(int|string $index): mixed
+    {
+        return $this->items[$index] ?? null;
+    }
+
+    /**
      * Add an item to this collection
      *
      * @param TValue $item
@@ -79,25 +96,40 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     }
 
     /**
+     * Add an item to this collection at a specific index
+     *
+     * @param TKey $index
+     * @param TValue $item
+     *
+     * @return $this
+     */
+    public function set(int|string $index, mixed $item): static
+    {
+        $this->items[$index] = $item;
+
+        return $this;
+    }
+
+    /**
      * Break this collection into a set of smaller chunks
      *
      * @param int<1, max> $size
      *
-     * @return static<static>
+     * @return self<int, static<int, TValue>>
      */
-    public function chunk(int $size): static
+    public function chunk(int $size): self
     {
         $chunks = array_chunk($this->items, $size);
 
-        return new static(
-            array_map(fn(array $chunk) => new static($chunk), $chunks)
+        return self::fromIterable(
+            array_map(fn(array $chunk) => static::fromIterable($chunk), $chunks),
         );
     }
 
     /**
      * Filter this collection using the given callback
      *
-     * @param ?callable(TValue, int): bool $callable
+     * @param ?callable(TValue, TKey): bool $callable
      *
      * @return static
      */
@@ -105,7 +137,7 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     {
         $callable ??= fn(mixed $item) => $item;
 
-        return new static(
+        return static::fromIterable(
             array_filter($this->items, $callable, ARRAY_FILTER_USE_BOTH)
         );
     }
@@ -113,9 +145,9 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     /**
      * Merge a set of iterables into a single collection
      *
-     * @param iterable<int, TValue> ...$iterables
+     * @param iterable<TKey, TValue> ...$iterables
      *
-     * @return static<TValue>
+     * @return static<TKey, TValue>
      */
     public function merge(iterable ...$iterables): static
     {
@@ -124,13 +156,8 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
             $iterables,
         );
 
-        $lists = array_map(
-            fn(array $arrays) => array_values($arrays),
-            $arrays,
-        );
-
-        return new static(
-            array_merge($this->items, ...$lists),
+        return static::fromIterable(
+            array_merge($this->items, ...$arrays),
         );
     }
 
@@ -165,9 +192,19 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     }
 
     /**
+     * Get a new collection with the keys reset to consecutive integers
+     *
+     * @return static<TKey, TValue>
+     */
+    public function values(): static
+    {
+        return static::fromIterable(array_values($this->items));
+    }
+
+    /**
      * Convert this collection to an array
      *
-     * @return list<TValue>
+     * @return array<TKey, TValue>
      */
     public function all(): array
     {
@@ -177,7 +214,7 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     /**
      * Recursively convert this collection to an array
      *
-     * @return list<mixed>
+     * @return array<TKey, mixed>
      */
     public function toArray(): array
     {
@@ -189,11 +226,11 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
      *
      * @param callable(TValue): TMap $callable
      *
-     * @return static<TMap>
+     * @return static<TKey, TMap>
      */
     public function map(callable $callable): static
     {
-        return new static(
+        return static::fromIterable(
             array_map(fn(mixed $item) => $callable($item), $this->items)
         );
     }
@@ -201,7 +238,7 @@ abstract class Collection implements Countable, IteratorAggregate, JsonSerializa
     // Internals ----
 
     /**
-     * @return ArrayIterator<int, TValue>
+     * @return ArrayIterator<TKey, TValue>
      */
     public function getIterator(): ArrayIterator
     {

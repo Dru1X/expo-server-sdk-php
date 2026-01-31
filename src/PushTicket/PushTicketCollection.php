@@ -7,7 +7,7 @@ use Dru1x\ExpoPush\Support\Collection;
 /**
  * A collection of PushTicket objects
  *
- * @extends Collection<PushTicket>
+ * @extends Collection<int, PushTicket>
  */
 final class PushTicketCollection extends Collection
 {

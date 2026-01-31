@@ -10,7 +10,7 @@ use ValueError;
 /**
  * A collection of PushMessage objects
  *
- * @extends Collection<PushMessage>
+ * @extends Collection<int, PushMessage>
  */
 final class PushMessageCollection extends Collection
 {
