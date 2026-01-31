@@ -19,6 +19,8 @@ use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Pool;
 use Saloon\Http\Response;
 
+use function PHPStan\dumpType;
+
 class ExpoPush
 {
     protected ExpoPushConnector $connector;

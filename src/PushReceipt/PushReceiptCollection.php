@@ -7,7 +7,7 @@ use Dru1x\ExpoPush\Support\Collection;
 /**
  * A collection of PushReceipt objects
  *
- * @extends Collection<PushReceipt>
+ * @extends Collection<int, PushReceipt>
  */
 final class PushReceiptCollection extends Collection
 {

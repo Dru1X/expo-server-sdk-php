@@ -7,7 +7,7 @@ use Dru1x\ExpoPush\Support\Collection;
 /**
  * A collection of PushError objects
  *
- * @extends Collection<PushError>
+ * @extends Collection<int, PushError>
  */
 final class PushErrorCollection extends Collection
 {
