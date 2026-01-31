@@ -13,6 +13,6 @@ final class PushErrorCollection extends Collection
 {
     public function __construct(PushError ...$errors)
     {
-        self::fromIterable($errors);
+        $this->items = $errors;
     }
 }

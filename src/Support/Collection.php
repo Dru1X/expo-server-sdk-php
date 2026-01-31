@@ -7,8 +7,6 @@ use Countable;
 use IteratorAggregate;
 use JsonSerializable;
 
-use function PHPStan\dumpType;
-
 /**
  * An abstract collection class with some useful helpers
  *
@@ -28,7 +26,7 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
      *
      * @var array<TKey, TValue>
      */
-    protected array $items;
+    protected array $items = [];
 
     /**
      * @template TNewKey of array-key
@@ -40,9 +38,28 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
      */
     public static function fromIterable(iterable $iterable = []): static
     {
-        return new static(
-            iterator_to_array($iterable)
-        );
+        // @phpstan-ignore-next-line
+        return match(static::class === self::class) {
+            true => self::base($iterable),
+            false => new static(...iterator_to_array($iterable)),
+        };
+    }
+
+    /**
+     * @template TNewKey of array-key
+     * @template TNewValue
+     *
+     * @param iterable<TNewKey, TNewValue> $iterable
+     *
+     * @return self<TNewKey, TNewValue>
+     */
+    public static function base(iterable $iterable = []): self
+    {
+        $self = new self;
+
+        $self->items = iterator_to_array($iterable);
+
+        return $self;
     }
 
     // Helpers ----
@@ -121,7 +138,7 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     {
         $chunks = array_chunk($this->items, $size);
 
-        return self::fromIterable(
+        return static::base(
             array_map(fn(array $chunk) => static::fromIterable($chunk), $chunks),
         );
     }

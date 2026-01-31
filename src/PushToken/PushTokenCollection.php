@@ -13,10 +13,10 @@ final class PushTokenCollection extends Collection
 {
     public function __construct(PushToken ...$items)
     {
-        self::fromIterable($items);
+        $this->items = $items;
     }
 
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         $tokens = array_map(PushToken::fromString(...), $data);
 

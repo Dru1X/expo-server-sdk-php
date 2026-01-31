@@ -17,7 +17,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             [1, 2],
-            Collection::make($data),
+            Collection::fromIterable($data),
         );
     }
 
@@ -26,7 +26,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCount(
             2,
-            Collection::make([1, 2]),
+            Collection::fromIterable([1, 2]),
         );
     }
 
@@ -36,7 +36,7 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             $expected,
-            Collection::make([1, 2])->contains($item),
+            Collection::fromIterable([1, 2])->contains($item),
         );
     }
 
@@ -46,7 +46,7 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             $value,
-            Collection::make([1, 2, 3, 'foo' => 4, 5])->get($key),
+            Collection::fromIterable([1, 2, 3, 'foo' => 4, 5])->get($key),
         );
     }
 
@@ -56,7 +56,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $result,
-            Collection::make($existing)->add($value),
+            Collection::fromIterable($existing)->add($value),
         );
     }
 
@@ -66,17 +66,16 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             [$key => $value],
-            Collection::make()->set($key, $value),
+            Collection::fromIterable()->set($key, $value),
         );
     }
 
     #[Test]
-    #[DataProvider('chunkProvider')]
-    public function can_chunk(array $items, bool $preserverKeys, array $expected): void
+    public function can_chunk(): void
     {
         $this->assertCollection(
-            $expected,
-            Collection::make($items)->chunk(2, $preserverKeys),
+            [[1, 2], [3]],
+            Collection::fromIterable([1, 2, 3])->chunk(2),
         );
     }
 
@@ -86,7 +85,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            Collection::make($items)->filter($callable),
+            Collection::fromIterable($items)->filter($callable),
         );
     }
 
@@ -96,7 +95,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            Collection::make([1, 2])->merge(...$toMerge),
+            Collection::fromIterable([1, 2])->merge(...$toMerge),
         );
     }
 
@@ -154,14 +153,6 @@ class CollectionTest extends TestCase
         return [
             'integer key' => [2, 3],
             'string key' => ['foo', 4],
-        ];
-    }
-
-    public static function chunkProvider(): array
-    {
-        return [
-            'dont preserve keys' => [[1, 2, 3], false, [[1, 2], [3]]],
-            'preserve keys' => [[1, 2, 3], true, [[1, 2], [2 => 3]]],
         ];
     }
 

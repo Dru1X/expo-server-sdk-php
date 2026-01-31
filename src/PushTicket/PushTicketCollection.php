@@ -13,6 +13,6 @@ final class PushTicketCollection extends Collection
 {
     public function __construct(PushTicket ...$pushTickets)
     {
-        self::fromIterable($pushTickets);
+        $this->items = $pushTickets;
     }
 }
