@@ -7,16 +7,16 @@ use Dru1x\ExpoPush\Support\Collection;
 /**
  * A collection of PushToken objects
  *
- * @extends Collection<array-key, PushToken>
+ * @extends Collection<PushToken>
  */
 final class PushTokenCollection extends Collection
 {
-    public function __construct(PushToken ...$pushToken)
+    public function __construct(PushToken ...$items)
     {
-        parent::__construct($pushToken);
+        self::fromIterable($items);
     }
 
-    public static function fromArray(array $data): static
+    public static function fromArray(array $data): self
     {
         $tokens = array_map(PushToken::fromString(...), $data);
 
