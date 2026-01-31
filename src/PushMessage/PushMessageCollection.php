@@ -10,13 +10,13 @@ use ValueError;
 /**
  * A collection of PushMessage objects
  *
- * @extends Collection<array-key, PushMessage>
+ * @extends Collection<int, PushMessage>
  */
 final class PushMessageCollection extends Collection
 {
     public function __construct(PushMessage ...$pushMessages)
     {
-        parent::__construct($pushMessages);
+        $this->items = $pushMessages;
     }
 
     /**

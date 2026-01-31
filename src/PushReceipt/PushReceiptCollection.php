@@ -7,13 +7,13 @@ use Dru1x\ExpoPush\Support\Collection;
 /**
  * A collection of PushReceipt objects
  *
- * @extends Collection<array-key, PushReceipt>
+ * @extends Collection<int, PushReceipt>
  */
 final class PushReceiptCollection extends Collection
 {
-    public function __construct(PushReceipt ...$pushReceipt)
+    public function __construct(PushReceipt ...$pushReceipts)
     {
-        parent::__construct($pushReceipt);
+        $this->items = $pushReceipts;
     }
 
     // Helpers ----

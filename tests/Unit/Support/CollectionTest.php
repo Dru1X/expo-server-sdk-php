@@ -1,0 +1,285 @@
+<?php
+
+namespace Dru1x\ExpoPush\Tests\Unit\Support;
+
+use ArrayIterator;
+use Dru1x\ExpoPush\Support\Collection;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Constraint\IsIdentical;
+use PHPUnit\Framework\TestCase;
+
+class CollectionTest extends TestCase
+{
+    #[Test]
+    #[DataProvider('constructProvider')]
+    public function can_construct(iterable $data): void
+    {
+        $this->assertCollection(
+            [1, 2],
+            Collection::fromIterable($data),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('constructProvider')]
+    public function can_construct_base(iterable $data): void
+    {
+        $this->assertCollection(
+            [1, 2],
+            Collection::base($data),
+        );
+    }
+
+    #[Test]
+    public function can_count(): void
+    {
+        $this->assertCount(
+            2,
+            Collection::fromIterable([1, 2]),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('containsProvider')]
+    public function can_contains(mixed $item, bool $expected): void
+    {
+        $this->assertSame(
+            $expected,
+            Collection::fromIterable([1, 2])->contains($item),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('getProvider')]
+    public function can_get(int|string $key, mixed $value): void
+    {
+        $this->assertSame(
+            $value,
+            Collection::fromIterable([1, 2, 3, 'foo' => 4, 5])->get($key),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('addProvider')]
+    public function can_add(array $existing, mixed $value, array $result): void
+    {
+        $this->assertCollection(
+            $result,
+            Collection::fromIterable($existing)->add($value),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('setProvider')]
+    public function can_set(int|string $key, mixed $value): void
+    {
+        $this->assertCollection(
+            [$key => $value],
+            Collection::fromIterable()->set($key, $value),
+        );
+    }
+
+    #[Test]
+    public function can_chunk(): void
+    {
+        $this->assertCollection(
+            [[1, 2], [3]],
+            Collection::fromIterable([1, 2, 3])->chunk(2),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('filterProvider')]
+    public function can_filter(array $items, ?callable $callable, array $expected): void
+    {
+        $this->assertCollection(
+            $expected,
+            Collection::fromIterable($items)->filter($callable),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('mergeProvider')]
+    public function can_merge(array $toMerge, array $expected): void
+    {
+        $this->assertCollection(
+            $expected,
+            Collection::fromIterable([1, 2])->merge(...$toMerge),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('reduceProvider')]
+    public function can_reduce(array $items, callable $callable, mixed $initial, mixed $expected): void
+    {
+        $this->assertSame(
+            $expected,
+            Collection::fromIterable($items)->reduce($callable, $initial),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('sumProvider')]
+    public function can_sum(array $items, ?callable $callable, mixed $initial, mixed $expected): void
+    {
+        $this->assertSame(
+            $expected,
+            Collection::fromIterable($items)->sum($callable, $initial),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('valuesProvider')]
+    public function can_values(array $items, array $expected): void
+    {
+        $this->assertCollection(
+            $expected,
+            Collection::fromIterable($items)->values(),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('allProvider')]
+    public function can_all(array $items): void
+    {
+        $this->assertSame(
+            $items,
+            Collection::fromIterable($items)->all(),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('toArrayProvider')]
+    public function can_to_array(array $items, array $expected): void
+    {
+        $this->assertSame(
+            $expected,
+            Collection::fromIterable($items)->toArray(),
+        );
+    }
+
+    protected function assertCollection(array $expected, Collection $actual): void
+    {
+        self::assertThat(
+            $actual->toArray(),
+            new IsIdentical($expected),
+        );
+    }
+
+    public static function constructProvider(): array
+    {
+        return [
+            'array' => [[1, 2]],
+            'iterable' => [new ArrayIterator([1, 2])],
+            'generator' => [(function() {
+                foreach([1, 2] as $item) {
+                    yield $item;
+                }
+            })()],
+        ];
+    }
+
+    public static function containsProvider(): array
+    {
+        return [
+            'does' => [2, true],
+            'doesnt' => [3, false],
+            'doesnt loose' => ['2', false],
+        ];
+    }
+
+    public static function getProvider(): array
+    {
+        return [
+            'integer key present' => [2, 3],
+            'integer key not present' => [5, null],
+            'string key present' => ['foo', 4],
+            'string key not present' => ['bar', null],
+        ];
+    }
+
+    public static function addProvider(): array
+    {
+        return [
+            'list' => [[1, 2], 3, [1, 2, 3]],
+            'integer dictionary' => [[3 => 'foo', 1 => 'bar'], 'baz', [3 => 'foo', 1 => 'bar', 4 => 'baz']],
+            'string dictionary' => [['foo' => 1, 'bar' => 2], 3, ['foo' => 1, 'bar' => 2, 0 => 3]],
+        ];
+    }
+
+    public static function setProvider(): array
+    {
+        return [
+            'integer key' => [2, 3],
+            'string key' => ['foo', 4],
+        ];
+    }
+
+    public static function filterProvider(): array
+    {
+        return [
+            'passing callable' => [[1, 2, 3, 4, 5], fn(int $number) => $number % 2, [0 => 1, 2 => 3, 4 => 5]],
+            'without passing callable' => [[0, 1, '', null, false, ' '], null, [1 => 1, 5 => ' ']],
+            'using key' => [[1, 2, 3, 4, 5], fn(int $_, int $key) => $key % 2, [1 => 2, 3 => 4]],
+        ];
+    }
+
+    public static function mergeProvider(): array
+    {
+        return [
+            'single' => [[[3, 4]], [1, 2, 3, 4]],
+            'multiple' => [[[3, 4], [5, 6]], [1, 2, 3, 4, 5, 6]],
+            'iterables' => [[new ArrayIterator([3, 4]), new ArrayIterator([5, 6])], [1, 2, 3, 4, 5, 6]],
+        ];
+    }
+
+    public static function reduceProvider(): array
+    {
+        return [
+            'integers' => [[1, 2, 3], fn(?int $carry, int $item) => $carry + $item, null, 6],
+            'integers with initial' => [[1, 2, 3], fn(int $carry, int $item) => $carry + $item, 4, 10],
+            'strings' => [['one', 'two', 'three'], fn(string $carry, string $item) => $carry . $item, '', 'onetwothree'],
+            'strings with initial' => [['one', 'two', 'three'], fn(string $carry, string $item) => $carry . $item, 'zero', 'zeroonetwothree'],
+        ];
+    }
+
+    public static function sumProvider(): array
+    {
+        return [
+            'integers' => [[1, 2, 3], null, null, 6],
+            'integers with initial' => [[1, 2, 3], null, 4, 10],
+            'custom callback' => [[1, 2, 3], fn(int $item) => $item * 2, null, 12],
+            'custom callback with initial' => [[1, 2, 3], fn(int $item) => $item * 2, 4, 16],
+            'arrays' => [[['foo' => 1], ['foo' => 2], ['baz' => 3]], null, [], ['foo' => 1, 'baz' => 3]],
+            'arrays with initial' => [[['foo' => 1], ['foo' => 2], ['baz' => 3]], null, ['foo' => 4], ['foo' => 4, 'baz' => 3]],
+        ];
+    }
+
+    public static function valuesProvider(): array
+    {
+        return [
+            'list' => [[1, 2, 3], [1, 2, 3]],
+            'integer dictionary' => [[3 => 'foo', 1 => 'bar', 2 => 'baz'], ['foo', 'bar', 'baz']],
+            'string dictionary' => [['foo' => 1, 'bar' => 2, 'baz' => 3], [1, 2, 3]],
+        ];
+    }
+
+    public static function allProvider(): array
+    {
+        return [
+            'list' => [[1, 2, 3]],
+            'integer dictionary' => [[3 => 'foo', 1 => 'bar', 2 => 'baz']],
+            'string dictionary' => [['foo' => 1, 'bar' => 2, 'baz' => 3]],
+        ];
+    }
+
+    public static function toArrayProvider(): array
+    {
+        return [
+            'array' => [[1, 2, 3], [1, 2, 3]],
+            'nested array' => [[1, [2], [[3]]], [1, [2], [[3]]]],
+            'nested collection' => [[1, Collection::fromIterable([2]), Collection::fromIterable([Collection::fromIterable([3])])], [1, [2], [[3]]]],
+        ];
+    }
+}

@@ -7,13 +7,13 @@ use Dru1x\ExpoPush\Support\Collection;
 /**
  * A collection of PushToken objects
  *
- * @extends Collection<array-key, PushToken>
+ * @extends Collection<int, PushToken>
  */
 final class PushTokenCollection extends Collection
 {
-    public function __construct(PushToken ...$pushToken)
+    public function __construct(PushToken ...$items)
     {
-        parent::__construct($pushToken);
+        $this->items = $items;
     }
 
     public static function fromArray(array $data): static
