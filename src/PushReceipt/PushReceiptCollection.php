@@ -11,9 +11,9 @@ use Dru1x\ExpoPush\Support\Collection;
  */
 final class PushReceiptCollection extends Collection
 {
-    public function __construct(PushReceipt ...$pushReceipt)
+    public function __construct(PushReceipt ...$pushReceipts)
     {
-        self::fromIterable($pushReceipt);
+        $this->items = $pushReceipts;
     }
 
     // Helpers ----

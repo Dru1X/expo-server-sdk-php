@@ -16,7 +16,7 @@ final class PushMessageCollection extends Collection
 {
     public function __construct(PushMessage ...$pushMessages)
     {
-        self::fromIterable($pushMessages);
+        $this->items = $pushMessages;
     }
 
     /**
