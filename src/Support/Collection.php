@@ -6,44 +6,38 @@ use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use JsonSerializable;
-use Traversable;
 
 /**
  * An abstract collection class with some useful helpers
  *
- * TODO: make it just int? separate data structure for dictionary!
- * @template TKey of array-key
  * @template TValue
  *
  * @template-implements IteratorAggregate<int, TValue>
+ *
+ * @phpstan-consistent-constructor
  */
-class Collection implements Countable, IteratorAggregate, JsonSerializable
+abstract class Collection implements Countable, IteratorAggregate, JsonSerializable
 {
     use ConvertsFromJson, ConvertsToJson;
 
     /**
      * The items contained in the collection
      *
-     * @var array<TKey, TValue>
+     * @var list<TValue>
      */
     protected array $items;
 
     /**
-     * @param iterable<TKey, TValue> $items
-     */
-    public function __construct(iterable $items)
-    {
-        $this->items = iterator_to_array($items);
-    }
-
-    /**
-     * @param iterable<TKey, TValue> $items
+     * @param iterable<int, TValue> $iterable
      *
-     * @return static<TKey, TValue>
+     * @return static<TValue>
      */
-    public static function make(iterable $items = []): static
+    public static function fromIterable(iterable $iterable = []): static
     {
-        return new static($items);
+        $array = iterator_to_array($iterable);
+        $list = array_values($array);
+
+        return new static($list);
     }
 
     // Helpers ----
@@ -71,18 +65,6 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     }
 
     /**
-     * Get an item from this collection by its key
-     *
-     * @param TKey $index
-     *
-     * @return TValue|null
-     */
-    public function get(int|string $index): mixed
-    {
-        return $this->items[$index] ?? null;
-    }
-
-    /**
      * Add an item to this collection
      *
      * @param TValue $item
@@ -97,30 +79,15 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     }
 
     /**
-     * Add an item to this collection at a specific index
-     *
-     * @param TKey $index
-     * @param TValue $item
-     *
-     * @return $this
-     */
-    public function set(int|string $index, mixed $item): static
-    {
-        $this->items[$index] = $item;
-
-        return $this;
-    }
-
-    /**
      * Break this collection into a set of smaller chunks
      *
      * @param int<1, max> $size
      *
-     * @return static<int, <static>>
+     * @return static<static>
      */
-    public function chunk(int $size, bool $preserveKeys = false): static
+    public function chunk(int $size): static
     {
-        $chunks = array_chunk($this->items, $size, $preserveKeys);
+        $chunks = array_chunk($this->items, $size);
 
         return new static(
             array_map(fn(array $chunk) => new static($chunk), $chunks)
@@ -130,7 +97,7 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     /**
      * Filter this collection using the given callback
      *
-     * @param ?callable(TValue, TKey): bool $callable
+     * @param ?callable(TValue, int): bool $callable
      *
      * @return static
      */
@@ -146,9 +113,9 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     /**
      * Merge a set of iterables into a single collection
      *
-     * @param iterable<TKey, TValue> ...$iterables
+     * @param iterable<int, TValue> ...$iterables
      *
-     * @return static<TKey, TValue>
+     * @return static<TValue>
      */
     public function merge(iterable ...$iterables): static
     {
@@ -157,8 +124,13 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
             $iterables,
         );
 
+        $lists = array_map(
+            fn(array $arrays) => array_values($arrays),
+            $arrays,
+        );
+
         return new static(
-            array_merge($this->items, ...$arrays),
+            array_merge($this->items, ...$lists),
         );
     }
 
@@ -193,19 +165,9 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     }
 
     /**
-     * Get a new collection with the keys reset to consecutive integers
-     *
-     * @return static<TKey, TValue>
-     */
-    public function values(): static
-    {
-        return new static(...array_values($this->items));
-    }
-
-    /**
      * Convert this collection to an array
      *
-     * @return array<TKey, TValue>
+     * @return list<TValue>
      */
     public function all(): array
     {
@@ -215,7 +177,7 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     /**
      * Recursively convert this collection to an array
      *
-     * @return array<TKey, TValue>
+     * @return list<mixed>
      */
     public function toArray(): array
     {
@@ -225,13 +187,13 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     /**
      * @template TMap of mixed
      *
-     * @param callable(TValue, TKey): TMap $callable
+     * @param callable(TValue): TMap $callable
      *
-     * @return static<TKey, TMap>
+     * @return static<TMap>
      */
     public function map(callable $callable): static
     {
-        return static::make(
+        return new static(
             array_map(fn(mixed $item) => $callable($item), $this->items)
         );
     }
@@ -239,7 +201,7 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     // Internals ----
 
     /**
-     * @return ArrayIterator<TKey, TValue>
+     * @return ArrayIterator<int, TValue>
      */
     public function getIterator(): ArrayIterator
     {

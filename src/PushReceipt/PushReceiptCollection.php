@@ -7,13 +7,13 @@ use Dru1x\ExpoPush\Support\Collection;
 /**
  * A collection of PushReceipt objects
  *
- * @extends Collection<array-key, PushReceipt>
+ * @extends Collection<PushReceipt>
  */
 final class PushReceiptCollection extends Collection
 {
     public function __construct(PushReceipt ...$pushReceipt)
     {
-        parent::__construct($pushReceipt);
+        self::fromIterable($pushReceipt);
     }
 
     // Helpers ----

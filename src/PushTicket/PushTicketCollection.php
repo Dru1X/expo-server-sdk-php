@@ -7,12 +7,12 @@ use Dru1x\ExpoPush\Support\Collection;
 /**
  * A collection of PushTicket objects
  *
- * @extends Collection<array-key, PushTicket>
+ * @extends Collection<PushTicket>
  */
 final class PushTicketCollection extends Collection
 {
     public function __construct(PushTicket ...$pushTickets)
     {
-        parent::__construct($pushTickets);
+        self::fromIterable($pushTickets);
     }
 }
