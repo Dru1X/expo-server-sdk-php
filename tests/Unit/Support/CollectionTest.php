@@ -22,6 +22,16 @@ class CollectionTest extends TestCase
     }
 
     #[Test]
+    #[DataProvider('constructProvider')]
+    public function can_construct_base(iterable $data): void
+    {
+        $this->assertCollection(
+            [1, 2],
+            Collection::base($data),
+        );
+    }
+
+    #[Test]
     public function can_count(): void
     {
         $this->assertCount(
@@ -99,6 +109,56 @@ class CollectionTest extends TestCase
         );
     }
 
+    #[Test]
+    #[DataProvider('reduceProvider')]
+    public function can_reduce(array $items, callable $callable, mixed $initial, mixed $expected): void
+    {
+        $this->assertSame(
+            $expected,
+            Collection::fromIterable($items)->reduce($callable, $initial),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('sumProvider')]
+    public function can_sum(array $items, ?callable $callable, mixed $initial, mixed $expected): void
+    {
+        $this->assertSame(
+            $expected,
+            Collection::fromIterable($items)->sum($callable, $initial),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('valuesProvider')]
+    public function can_values(array $items, array $expected): void
+    {
+        $this->assertCollection(
+            $expected,
+            Collection::fromIterable($items)->values(),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('allProvider')]
+    public function can_all(array $items): void
+    {
+        $this->assertSame(
+            $items,
+            Collection::fromIterable($items)->all(),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('toArrayProvider')]
+    public function can_to_array(array $items, array $expected): void
+    {
+        $this->assertSame(
+            $expected,
+            Collection::fromIterable($items)->toArray(),
+        );
+    }
+
     protected function assertCollection(array $expected, Collection $actual): void
     {
         self::assertThat(
@@ -171,6 +231,55 @@ class CollectionTest extends TestCase
             'single' => [[[3, 4]], [1, 2, 3, 4]],
             'multiple' => [[[3, 4], [5, 6]], [1, 2, 3, 4, 5, 6]],
             'iterables' => [[new ArrayIterator([3, 4]), new ArrayIterator([5, 6])], [1, 2, 3, 4, 5, 6]],
+        ];
+    }
+
+    public static function reduceProvider(): array
+    {
+        return [
+            'integers' => [[1, 2, 3], fn(?int $carry, int $item) => $carry + $item, null, 6],
+            'integers with initial' => [[1, 2, 3], fn(int $carry, int $item) => $carry + $item, 4, 10],
+            'strings' => [['one', 'two', 'three'], fn(string $carry, string $item) => $carry . $item, '', 'onetwothree'],
+            'strings with initial' => [['one', 'two', 'three'], fn(string $carry, string $item) => $carry . $item, 'zero', 'zeroonetwothree'],
+        ];
+    }
+
+    public static function sumProvider(): array
+    {
+        return [
+            'integers' => [[1, 2, 3], null, null, 6],
+            'integers with initial' => [[1, 2, 3], null, 4, 10],
+            'custom callback' => [[1, 2, 3], fn(int $item) => $item * 2, null, 12],
+            'custom callback with initial' => [[1, 2, 3], fn(int $item) => $item * 2, 4, 16],
+            'arrays' => [[['foo' => 1], ['foo' => 2], ['baz' => 3]], null, [], ['foo' => 1, 'baz' => 3]],
+            'arrays with initial' => [[['foo' => 1], ['foo' => 2], ['baz' => 3]], null, ['foo' => 4], ['foo' => 4, 'baz' => 3]],
+        ];
+    }
+
+    public static function valuesProvider(): array
+    {
+        return [
+            'list' => [[1, 2, 3], [1, 2, 3]],
+            'integer dictionary' => [[3 => 'foo', 1 => 'bar', 2 => 'baz'], ['foo', 'bar', 'baz']],
+            'string dictionary' => [['foo' => 1, 'bar' => 2, 'baz' => 3], [1, 2, 3]],
+        ];
+    }
+
+    public static function allProvider(): array
+    {
+        return [
+            'list' => [[1, 2, 3]],
+            'integer dictionary' => [[3 => 'foo', 1 => 'bar', 2 => 'baz']],
+            'string dictionary' => [['foo' => 1, 'bar' => 2, 'baz' => 3]],
+        ];
+    }
+
+    public static function toArrayProvider(): array
+    {
+        return [
+            'array' => [[1, 2, 3], [1, 2, 3]],
+            'nested array' => [[1, [2], [[3]]], [1, [2], [[3]]]],
+            'nested collection' => [[1, Collection::fromIterable([2]), Collection::fromIterable([Collection::fromIterable([3])])], [1, [2], [[3]]]],
         ];
     }
 }
