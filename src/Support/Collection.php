@@ -175,6 +175,18 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     }
 
     /**
+     * Check if the collection doesnt contains a given value
+     *
+     * @param TValue $value
+     *
+     * @return bool
+     */
+    public function doesntContain(mixed $value): bool
+    {
+        return ! $this->contains($value);
+    }
+
+    /**
      * Get the number of items in the collection
      *
      * @return int
@@ -198,6 +210,26 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
         return static::fromIterable(
             array_filter($this->items, $callable, ARRAY_FILTER_USE_BOTH)
         );
+    }
+
+    /**
+     * Check if the collection contains no items
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return $this->count() === 0;
+    }
+
+    /**
+     * Check if the collection contains any items
+     *
+     * @return bool
+     */
+    public function isNotEmpty(): bool
+    {
+        return ! $this->isEmpty();
     }
 
     /**
@@ -263,6 +295,22 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     public function reduce(callable $callback, mixed $initial = null)
     {
         return array_reduce($this->items, $callback, $initial);
+    }
+
+    /**
+     * Filter the collection to items where the callback returns a falsy value
+     *
+     * @param ?callable(TValue, TKey): bool $callable
+     *
+     * @return static
+     */
+    public function reject(?callable $callable): static
+    {
+        $callable ??= fn(mixed $item, int|string $key) => $item;
+
+        $callable = fn(mixed $item, int|string $key) => ! $callable($item, $key);
+
+        return $this->filter($callable);
     }
 
     /**

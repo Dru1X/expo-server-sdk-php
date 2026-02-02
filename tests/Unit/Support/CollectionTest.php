@@ -183,6 +183,32 @@ class CollectionTest extends TestCase
         $this->assertSame($results, $array);
     }
 
+
+    #[Test]
+    public function can_check_if_a_collection_is_empty(): void
+    {
+        $empty = Collection::fromIterable();
+        $notEmpty = Collection::fromIterable([0]);
+
+        $this->assertTrue(
+            $empty->isEmpty()
+        );
+
+        $this->assertFalse(
+            $notEmpty->isEmpty()
+        );
+    }
+
+    #[Test]
+    #[DataProvider('rejectProvider')]
+    public function can_reject_items_from_a_collection(array $items, ?callable $callable, array $expected): void
+    {
+        $this->assertCollection(
+            $expected,
+            Collection::fromIterable($items)->reject($callable),
+        );
+    }
+
     protected function assertCollection(array $expected, Collection $actual): void
     {
         self::assertThat(
@@ -317,6 +343,15 @@ class CollectionTest extends TestCase
                     yield $item;
                 }
             })()],
+        ];
+    }
+
+    public static function rejectProvider(): array
+    {
+        return [
+            'passing callable' => [[1, 2, 3, 4, 5], fn(int $number) => $number % 2, [1 => 2, 3 => 4]],
+            'without passing callable' => [[0, 1, '', null, false, ' '], null, [0 => 0, 2 => '', 3 => null, 4 => false]],
+            'using key' => [[1, 2, 3, 4, 5], fn(int $_, int $key) => $key % 2, [0 => 1, 2 => 3, 4 => 5]],
         ];
     }
 }
