@@ -11,9 +11,9 @@ use Dru1x\ExpoPush\Support\Collection;
  */
 final class PushTokenCollection extends Collection
 {
-    public function __construct(PushToken ...$items)
+    public function __construct(PushToken ...$pushTokens)
     {
-        $this->items = $items;
+        $this->items = $pushTokens;
     }
 
     public static function fromArray(array $data): static
