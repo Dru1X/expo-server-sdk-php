@@ -79,7 +79,7 @@ final class PushMessageCollection extends Collection
             if ($notificationCount >= 2 && $pushMessage->to instanceof PushTokenCollection) {
 
                 // Get a copy of the recipient list
-                $allRecipients = $pushMessage->to->toArray();
+                $allRecipients = $pushMessage->to->all();
 
                 // Fill the current chunk with the first recipients
                 $chunks[$currentChunkIndex][] = $pushMessage->copy(
@@ -117,7 +117,7 @@ final class PushMessageCollection extends Collection
     public function getTokens(): PushTokenCollection
     {
         $extractPushTokens = fn(array $carry, PushMessage $message) => array_merge($carry,
-            $message->to instanceof PushToken ? [$message->to] : $message->to->toArray()
+            $message->to instanceof PushToken ? [$message->to] : $message->to->all()
         );
 
         return new PushTokenCollection(

@@ -116,7 +116,7 @@ final class GetReceiptsRequest extends Request implements HasBody
         $this->preventTooManyReceipts();
 
         return [
-            'ids' => $this->pushReceiptIds->toArray(),
+            'ids' => $this->pushReceiptIds->all(),
         ];
     }
 

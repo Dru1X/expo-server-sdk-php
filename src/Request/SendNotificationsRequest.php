@@ -123,7 +123,7 @@ final class SendNotificationsRequest extends Request implements HasBody
         $this->preventTooManyMessages();
         $this->preventTooMuchMessageData();
 
-        return $this->pushMessages->toArray();
+        return $this->pushMessages->all();
     }
 
     /**

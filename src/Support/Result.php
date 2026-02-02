@@ -12,6 +12,6 @@ abstract readonly class Result
 
     public function hasErrors(): bool
     {
-        return $this->errors->count() > 0;
+        return $this->errors->isNotEmpty();
     }
 }
