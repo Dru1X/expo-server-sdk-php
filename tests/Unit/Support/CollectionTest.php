@@ -8,12 +8,13 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Constraint\IsIdentical;
 use PHPUnit\Framework\TestCase;
+use Traversable;
 
 class CollectionTest extends TestCase
 {
     #[Test]
     #[DataProvider('constructProvider')]
-    public function can_construct(iterable $data): void
+    public function can_construct_a_collection(iterable $data): void
     {
         $this->assertCollection(
             [1, 2],
@@ -23,7 +24,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('constructProvider')]
-    public function can_construct_base(iterable $data): void
+    public function can_construct_a_base_collection(iterable $data): void
     {
         $this->assertCollection(
             [1, 2],
@@ -32,7 +33,7 @@ class CollectionTest extends TestCase
     }
 
     #[Test]
-    public function can_count(): void
+    public function can_count_a_collection(): void
     {
         $this->assertCount(
             2,
@@ -42,7 +43,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('containsProvider')]
-    public function can_contains(mixed $item, bool $expected): void
+    public function can_check_if_a_collection_contains_a_given_value(mixed $item, bool $expected): void
     {
         $this->assertSame(
             $expected,
@@ -52,7 +53,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('getProvider')]
-    public function can_get(int|string $key, mixed $value): void
+    public function can_retrieve_a_collection_value_by_its_key(int|string $key, mixed $value): void
     {
         $this->assertSame(
             $value,
@@ -62,7 +63,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('addProvider')]
-    public function can_add(array $existing, mixed $value, array $result): void
+    public function can_add_an_item_to_a_collection(array $existing, mixed $value, array $result): void
     {
         $this->assertCollection(
             $result,
@@ -72,7 +73,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('setProvider')]
-    public function can_set(int|string $key, mixed $value): void
+    public function can_set_a_collection_value_at_the_given_key(int|string $key, mixed $value): void
     {
         $this->assertCollection(
             [$key => $value],
@@ -81,7 +82,7 @@ class CollectionTest extends TestCase
     }
 
     #[Test]
-    public function can_chunk(): void
+    public function can_break_a_collection_into_chunks(): void
     {
         $this->assertCollection(
             [[1, 2], [3]],
@@ -91,7 +92,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('filterProvider')]
-    public function can_filter(array $items, ?callable $callable, array $expected): void
+    public function can_filter_a_collection(array $items, ?callable $callable, array $expected): void
     {
         $this->assertCollection(
             $expected,
@@ -101,7 +102,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('mergeProvider')]
-    public function can_merge(array $toMerge, array $expected): void
+    public function can_merge_a_collection_with_provided_iterables(array $toMerge, array $expected): void
     {
         $this->assertCollection(
             $expected,
@@ -111,7 +112,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('reduceProvider')]
-    public function can_reduce(array $items, callable $callable, mixed $initial, mixed $expected): void
+    public function can_reduce_a_collection_to_a_single_value(array $items, callable $callable, mixed $initial, mixed $expected): void
     {
         $this->assertSame(
             $expected,
@@ -121,7 +122,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('sumProvider')]
-    public function can_sum(array $items, ?callable $callable, mixed $initial, mixed $expected): void
+    public function can_sum_a_collection_with_provided_callable(array $items, ?callable $callable, mixed $initial, mixed $expected): void
     {
         $this->assertSame(
             $expected,
@@ -131,7 +132,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('valuesProvider')]
-    public function can_values(array $items, array $expected): void
+    public function can_create_a_consecutively_keyed_collection(array $items, array $expected): void
     {
         $this->assertCollection(
             $expected,
@@ -141,7 +142,7 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('allProvider')]
-    public function can_all(array $items): void
+    public function can_retrieve_all_items_from_a_collection(array $items): void
     {
         $this->assertSame(
             $items,
@@ -151,12 +152,35 @@ class CollectionTest extends TestCase
 
     #[Test]
     #[DataProvider('toArrayProvider')]
-    public function can_to_array(array $items, array $expected): void
+    public function can_recursively_convert_a_collection_to_an_array(array $items, array $expected): void
     {
         $this->assertSame(
             $expected,
             Collection::fromIterable($items)->toArray(),
         );
+    }
+
+    #[Test]
+    public function can_map_over_a_collection(): void
+    {
+        $this->assertCollection(
+            [1, 4, 9],
+            Collection::fromIterable([1, 2, 3])->map(fn(int $item) => $item * $item),
+        );
+    }
+
+    #[Test]
+    #[DataProvider('getIteratorProvider')]
+    public function can_create_an_iterator_from_a_collection(iterable $items): void
+    {
+        $array = $items = iterator_to_array($items);
+
+        $iterator = Collection::fromIterable($items)->getIterator();
+
+        $results = iterator_to_array($iterator);
+
+        $this->assertInstanceOf(Traversable::class, $iterator);
+        $this->assertSame($results, $array);
     }
 
     protected function assertCollection(array $expected, Collection $actual): void
@@ -280,6 +304,19 @@ class CollectionTest extends TestCase
             'array' => [[1, 2, 3], [1, 2, 3]],
             'nested array' => [[1, [2], [[3]]], [1, [2], [[3]]]],
             'nested collection' => [[1, Collection::fromIterable([2]), Collection::fromIterable([Collection::fromIterable([3])])], [1, [2], [[3]]]],
+        ];
+    }
+
+    public static function getIteratorProvider(): array
+    {
+        return [
+            'array' => [[1, 2]],
+            'iterable' => [new ArrayIterator([1, 2])],
+            'generator' => [(function() {
+                foreach([1, 2] as $item) {
+                    yield $item;
+                }
+            })()],
         ];
     }
 }
