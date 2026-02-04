@@ -13,7 +13,7 @@ use Traversable;
  */
 trait Collection
 {
-    use ConvertsToJson;
+    use ConvertsFromJson, ConvertsToJson;
 
     /**
      * The items contained in the collection
