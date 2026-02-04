@@ -2,18 +2,22 @@
 
 namespace Dru1x\ExpoPush\PushMessage;
 
+use Countable;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
 use Dru1x\ExpoPush\Support\Collection;
+use IteratorAggregate;
+use JsonSerializable;
 use ValueError;
 
 /**
  * A collection of PushMessage objects
- *
- * @extends Collection<int, PushMessage>
  */
-final class PushMessageCollection extends Collection
+final class PushMessageCollection implements Countable, IteratorAggregate, JsonSerializable
 {
+    /** @use Collection<int, PushMessage> */
+    use Collection;
+
     public function __construct(PushMessage ...$pushMessages)
     {
         $this->items = $pushMessages;

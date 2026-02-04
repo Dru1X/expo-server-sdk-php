@@ -3,7 +3,11 @@
 namespace Dru1x\ExpoPush\Tests\Unit\Support;
 
 use ArrayIterator;
+use Countable;
 use Dru1x\ExpoPush\Support\Collection;
+use Dru1x\ExpoPush\Support\GenericCollection;
+use IteratorAggregate;
+use JsonSerializable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Constraint\IsIdentical;
@@ -18,17 +22,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             [1, 2],
-            Collection::fromIterable($data),
-        );
-    }
-
-    #[Test]
-    #[DataProvider('constructProvider')]
-    public function can_construct_a_base_collection(iterable $data): void
-    {
-        $this->assertCollection(
-            [1, 2],
-            Collection::base($data),
+            BaseCollection::make(...$data),
         );
     }
 
@@ -37,7 +31,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCount(
             2,
-            Collection::fromIterable([1, 2]),
+            BaseCollection::make(...[1, 2]),
         );
     }
 
@@ -47,7 +41,7 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             $expected,
-            Collection::fromIterable([1, 2])->contains($item),
+            BaseCollection::make(1, 2)->contains($item),
         );
     }
 
@@ -57,7 +51,7 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             $value,
-            Collection::fromIterable([1, 2, 3, 'foo' => 4, 5])->get($key),
+            BaseCollection::fromIterable([1, 2, 3, 'foo' => 4, 5])->get($key),
         );
     }
 
@@ -67,7 +61,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $result,
-            Collection::fromIterable($existing)->add($value),
+            BaseCollection::fromIterable($existing)->add($value),
         );
     }
 
@@ -77,17 +71,22 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             [$key => $value],
-            Collection::fromIterable()->set($key, $value),
+            BaseCollection::make()->set($key, $value),
         );
     }
 
     #[Test]
     public function can_break_a_collection_into_chunks(): void
     {
-        $this->assertCollection(
-            [[1, 2], [3]],
-            Collection::fromIterable([1, 2, 3])->chunk(2),
-        );
+        $chunks = BaseCollection::fromIterable([1, 2, 3])->chunk(2);
+        $chunksArray = $chunks->all();
+
+        $this->assertCount(2, $chunks);
+        $this->assertSame([1, 2], $chunksArray[0]->all());
+        $this->assertSame([3], $chunksArray[1]->all());
+
+        $this->assertInstanceOf(GenericCollection::class, $chunks);
+        $this->assertInstanceOf(BaseCollection::class, $chunksArray[0]);
     }
 
     #[Test]
@@ -96,7 +95,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            Collection::fromIterable($items)->filter($callable),
+            BaseCollection::fromIterable($items)->filter($callable),
         );
     }
 
@@ -106,7 +105,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            Collection::fromIterable([1, 2])->merge(...$toMerge),
+            BaseCollection::make(...[1, 2])->merge(...$toMerge),
         );
     }
 
@@ -116,17 +115,7 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             $expected,
-            Collection::fromIterable($items)->reduce($callable, $initial),
-        );
-    }
-
-    #[Test]
-    #[DataProvider('sumProvider')]
-    public function can_sum_a_collection_with_provided_callable(array $items, ?callable $callable, mixed $initial, mixed $expected): void
-    {
-        $this->assertSame(
-            $expected,
-            Collection::fromIterable($items)->sum($callable, $initial),
+            BaseCollection::make(...$items)->reduce($callable, $initial),
         );
     }
 
@@ -136,7 +125,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            Collection::fromIterable($items)->values(),
+            BaseCollection::make(...$items)->values(),
         );
     }
 
@@ -146,17 +135,17 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             $items,
-            Collection::fromIterable($items)->all(),
+            BaseCollection::fromIterable($items)->all(),
         );
     }
 
     #[Test]
     #[DataProvider('toArrayProvider')]
-    public function can_recursively_convert_a_collection_to_an_array(array $items, array $expected): void
+    public function can_convert_a_nested_collection_to_an_array(array $items): void
     {
         $this->assertSame(
-            $expected,
-            Collection::fromIterable($items)->toArray(),
+            [...$items],
+            BaseCollection::fromIterable($items)->toArray(),
         );
     }
 
@@ -165,7 +154,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             [1, 4, 9],
-            Collection::fromIterable([1, 2, 3])->map(fn(int $item) => $item * $item),
+            BaseCollection::make(1, 2, 3)->map(fn(int $item) => $item * $item),
         );
     }
 
@@ -175,7 +164,7 @@ class CollectionTest extends TestCase
     {
         $array = $items = iterator_to_array($items);
 
-        $iterator = Collection::fromIterable($items)->getIterator();
+        $iterator = BaseCollection::make(...$items)->getIterator();
 
         $results = iterator_to_array($iterator);
 
@@ -187,8 +176,8 @@ class CollectionTest extends TestCase
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = Collection::fromIterable();
-        $notEmpty = Collection::fromIterable([0]);
+        $empty = BaseCollection::make();
+        $notEmpty = BaseCollection::make(...[0]);
 
         $this->assertTrue(
             $empty->isEmpty()
@@ -205,11 +194,11 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            Collection::fromIterable($items)->reject($callable),
+            BaseCollection::fromIterable($items)->reject($callable),
         );
     }
 
-    protected function assertCollection(array $expected, Collection $actual): void
+    protected function assertCollection(array $expected, BaseCollection|GenericCollection $actual): void
     {
         self::assertThat(
             $actual->toArray(),
@@ -294,18 +283,6 @@ class CollectionTest extends TestCase
         ];
     }
 
-    public static function sumProvider(): array
-    {
-        return [
-            'integers' => [[1, 2, 3], null, null, 6],
-            'integers with initial' => [[1, 2, 3], null, 4, 10],
-            'custom callback' => [[1, 2, 3], fn(int $item) => $item * 2, null, 12],
-            'custom callback with initial' => [[1, 2, 3], fn(int $item) => $item * 2, 4, 16],
-            'arrays' => [[['foo' => 1], ['foo' => 2], ['baz' => 3]], null, [], ['foo' => 1, 'baz' => 3]],
-            'arrays with initial' => [[['foo' => 1], ['foo' => 2], ['baz' => 3]], null, ['foo' => 4], ['foo' => 4, 'baz' => 3]],
-        ];
-    }
-
     public static function valuesProvider(): array
     {
         return [
@@ -327,9 +304,9 @@ class CollectionTest extends TestCase
     public static function toArrayProvider(): array
     {
         return [
-            'array' => [[1, 2, 3], [1, 2, 3]],
-            'nested array' => [[1, [2], [[3]]], [1, [2], [[3]]]],
-            'nested collection' => [[1, Collection::fromIterable([2]), Collection::fromIterable([Collection::fromIterable([3])])], [1, [2], [[3]]]],
+            'array' => [[1, 2, 3]],
+            'nested array' => [[1, [2], [[3]]]],
+            'nested collection' => [[1, BaseCollection::make(2), BaseCollection::make(BaseCollection::make(3))]],
         ];
     }
 
@@ -354,4 +331,9 @@ class CollectionTest extends TestCase
             'using key' => [[1, 2, 3, 4, 5], fn(int $_, int $key) => $key % 2, [0 => 1, 2 => 3, 4 => 5]],
         ];
     }
+}
+
+class BaseCollection implements Countable, IteratorAggregate, JsonSerializable
+{
+    use Collection;
 }

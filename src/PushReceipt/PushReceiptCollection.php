@@ -2,15 +2,19 @@
 
 namespace Dru1x\ExpoPush\PushReceipt;
 
+use Countable;
 use Dru1x\ExpoPush\Support\Collection;
+use IteratorAggregate;
+use JsonSerializable;
 
 /**
  * A collection of PushReceipt objects
- *
- * @extends Collection<int, PushReceipt>
  */
-final class PushReceiptCollection extends Collection
+final class PushReceiptCollection implements Countable, IteratorAggregate, JsonSerializable
 {
+    /** @use Collection<int, PushReceipt> */
+    use Collection;
+
     public function __construct(PushReceipt ...$pushReceipts)
     {
         $this->items = $pushReceipts;

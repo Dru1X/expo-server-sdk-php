@@ -148,7 +148,6 @@ final class SendNotificationsRequest extends Request implements HasBody
     protected function preventTooMuchMessageData(): void
     {
         foreach ($this->pushMessages as $pushMessage) {
-
             // If there's no data in the push message, there's nothing to do
             if (!$pushMessage->data) {
                 continue;

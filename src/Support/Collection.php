@@ -3,9 +3,6 @@
 namespace Dru1x\ExpoPush\Support;
 
 use ArrayIterator;
-use Countable;
-use IteratorAggregate;
-use JsonSerializable;
 use Traversable;
 
 /**
@@ -13,14 +10,10 @@ use Traversable;
  *
  * @template TKey of array-key
  * @template TValue
- *
- * @template-implements IteratorAggregate<TKey, TValue>
- *
- * @phpstan-consistent-constructor
  */
-class Collection implements Countable, IteratorAggregate, JsonSerializable
+trait Collection
 {
-    use ConvertsFromJson, ConvertsToJson;
+    use ConvertsToJson;
 
     /**
      * The items contained in the collection
@@ -32,39 +25,34 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     // Creation ----
 
     /**
-     * Create a collection from the provided iterable
-     *
-     * @template TNewKey of array-key
-     * @template TNewValue
-     *
-     * @param iterable<TNewKey, TNewValue> $iterable
-     *
-     * @return static<TNewKey, TNewValue>
+     * @param TValue ...$items
      */
-    public static function fromIterable(iterable $iterable = []): static
+    public function __construct(mixed ...$items)
     {
-        // @phpstan-ignore-next-line
-        return match(static::class === self::class) {
-            true => self::base($iterable),
-            false => new static(...iterator_to_array($iterable)),
-        };
+        $this->items = $items;
     }
 
     /**
-     * Create a base collection from the provided iterable
+     * @param TValue ...$items
      *
-     * @template TNewKey of array-key
-     * @template TNewValue
-     *
-     * @param iterable<TNewKey, TNewValue> $iterable
-     *
-     * @return self<TNewKey, TNewValue>
+     * @return self<TKey, TValue>
      */
-    public static function base(iterable $iterable = []): self
+    public static function make(mixed ...$items): self
     {
-        $self = new self;
+        return new self(...$items);
+    }
 
-        $self->items = iterator_to_array($iterable);
+    /**
+     * @param iterable<TKey, TValue> ...$items
+     *
+     * @return self<TKey, TValue>
+     */
+    public static function fromIterable(iterable $items): self
+    {
+        $array = iterator_to_array($items);
+
+        $self = new self;
+        $self->items = $array;
 
         return $self;
     }
@@ -125,13 +113,13 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     }
 
     /**
-     * Recursively get all items as an array
+     * Get all items as an array
      *
-     * @return array<TKey, mixed>
+     * @return array<TKey, TValue>
      */
     public function toArray(): array
     {
-        return $this->map(fn (mixed $value) => $value instanceof self ? $value->toArray() : $value)->all();
+        return $this->all();
     }
 
     /**
@@ -151,14 +139,14 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
      *
      * @param int<1, max> $length
      *
-     * @return self<int, static<int, TValue>>
+     * @return GenericCollection<int, self<TKey, TValue>>
      */
-    public function chunk(int $length): self
+    public function chunk(int $length): GenericCollection
     {
         $chunks = array_chunk($this->items, $length);
 
-        return static::base(
-            array_map(fn(array $chunk) => static::fromIterable($chunk), $chunks),
+        return GenericCollection::fromIterable(
+            array_map(fn(array $chunk) => new self(...$chunk), $chunks),
         );
     }
 
@@ -201,13 +189,13 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
      *
      * @param ?callable(TValue, TKey): bool $callable
      *
-     * @return static
+     * @return self<TKey, TValue>
      */
-    public function filter(?callable $callable): static
+    public function filter(?callable $callable): self
     {
         $callable ??= fn(mixed $item) => $item;
 
-        return static::fromIterable(
+        return self::fromIterable(
             array_filter($this->items, $callable, ARRAY_FILTER_USE_BOTH)
         );
     }
@@ -239,11 +227,11 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
      *
      * @param callable(TValue): TMap $callable
      *
-     * @return static<TKey, TMap>
+     * @return self<TKey, TValue>
      */
-    public function map(callable $callable): static
+    public function map(callable $callable): self
     {
-        return static::fromIterable(
+        return self::fromIterable(
             array_map(fn(mixed $item) => $callable($item), $this->items)
         );
     }
@@ -253,34 +241,18 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
      *
      * @param iterable<TKey, TValue> ...$iterables
      *
-     * @return static<TKey, TValue>
+     * @return self<TKey, TValue>
      */
-    public function merge(iterable ...$iterables): static
+    public function merge(iterable ...$iterables): self
     {
         $arrays = array_map(
             fn(iterable $iterator) => iterator_to_array($iterator),
             $iterables,
         );
 
-        return static::fromIterable(
-            array_merge($this->items, ...$arrays),
+        return new self(
+            ...array_merge($this->items, ...$arrays),
         );
-    }
-
-    /**
-     * Sum the items in the collection
-     *
-     * @template TReturnType of array|float|int
-     *
-     * @param  (callable(TValue): TReturnType)|null $callable
-     * @param TReturnType $initial
-     * @return ($callable is callable ? TReturnType : TValue)
-     */
-    public function sum(?callable $callable = null, mixed $initial = 0): mixed
-    {
-        $callable ??= fn(mixed $item) => $item;
-
-        return $this->reduce(fn ($carry, $item) => $carry + $callable($item), $initial);
     }
 
     /**
@@ -302,9 +274,9 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
      *
      * @param ?callable(TValue, TKey): bool $callable
      *
-     * @return static
+     * @return self<TKey, TValue>
      */
-    public function reject(?callable $callable): static
+    public function reject(?callable $callable): self
     {
         $callable ??= fn(mixed $item, int|string $key) => $item;
 
@@ -316,10 +288,10 @@ class Collection implements Countable, IteratorAggregate, JsonSerializable
     /**
      * Create a new collection with the same items but consecutive integer keys
      *
-     * @return static<TKey, TValue>
+     * @return self<TKey, TValue>
      */
-    public function values(): static
+    public function values(): self
     {
-        return static::fromIterable(array_values($this->items));
+        return new self(...array_values($this->items));
     }
 }
