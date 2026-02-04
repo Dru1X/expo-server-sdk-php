@@ -2,17 +2,21 @@
 
 namespace Dru1x\ExpoPush\PushTicket;
 
+use Countable;
 use Dru1x\ExpoPush\Support\Collection;
+use IteratorAggregate;
+use JsonSerializable;
 
 /**
  * A collection of PushTicket objects
- *
- * @extends Collection<array-key, PushTicket>
  */
-final class PushTicketCollection extends Collection
+final class PushTicketCollection implements Countable, IteratorAggregate, JsonSerializable
 {
+    /** @use Collection<int, PushTicket> */
+    use Collection;
+
     public function __construct(PushTicket ...$pushTickets)
     {
-        parent::__construct($pushTickets);
+        $this->items = $pushTickets;
     }
 }

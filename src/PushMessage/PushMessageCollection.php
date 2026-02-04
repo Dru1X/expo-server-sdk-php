@@ -2,21 +2,25 @@
 
 namespace Dru1x\ExpoPush\PushMessage;
 
+use Countable;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
 use Dru1x\ExpoPush\Support\Collection;
+use IteratorAggregate;
+use JsonSerializable;
 use ValueError;
 
 /**
  * A collection of PushMessage objects
- *
- * @extends Collection<array-key, PushMessage>
  */
-final class PushMessageCollection extends Collection
+final class PushMessageCollection implements Countable, IteratorAggregate, JsonSerializable
 {
+    /** @use Collection<int, PushMessage> */
+    use Collection;
+
     public function __construct(PushMessage ...$pushMessages)
     {
-        parent::__construct($pushMessages);
+        $this->items = $pushMessages;
     }
 
     /**
@@ -79,7 +83,7 @@ final class PushMessageCollection extends Collection
             if ($notificationCount >= 2 && $pushMessage->to instanceof PushTokenCollection) {
 
                 // Get a copy of the recipient list
-                $allRecipients = $pushMessage->to->toArray();
+                $allRecipients = $pushMessage->to->all();
 
                 // Fill the current chunk with the first recipients
                 $chunks[$currentChunkIndex][] = $pushMessage->copy(
@@ -117,7 +121,7 @@ final class PushMessageCollection extends Collection
     public function getTokens(): PushTokenCollection
     {
         $extractPushTokens = fn(array $carry, PushMessage $message) => array_merge($carry,
-            $message->to instanceof PushToken ? [$message->to] : $message->to->toArray()
+            $message->to instanceof PushToken ? [$message->to] : $message->to->all()
         );
 
         return new PushTokenCollection(

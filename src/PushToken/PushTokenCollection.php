@@ -2,18 +2,22 @@
 
 namespace Dru1x\ExpoPush\PushToken;
 
+use Countable;
 use Dru1x\ExpoPush\Support\Collection;
+use IteratorAggregate;
+use JsonSerializable;
 
 /**
  * A collection of PushToken objects
- *
- * @extends Collection<array-key, PushToken>
  */
-final class PushTokenCollection extends Collection
+final class PushTokenCollection implements Countable, IteratorAggregate, JsonSerializable
 {
-    public function __construct(PushToken ...$pushToken)
+    /** @use Collection<int, PushToken> */
+    use Collection;
+
+    public function __construct(PushToken ...$pushTokens)
     {
-        parent::__construct($pushToken);
+        $this->items = $pushTokens;
     }
 
     public static function fromArray(array $data): static

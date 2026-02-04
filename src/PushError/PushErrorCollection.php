@@ -2,17 +2,21 @@
 
 namespace Dru1x\ExpoPush\PushError;
 
+use Countable;
 use Dru1x\ExpoPush\Support\Collection;
+use IteratorAggregate;
+use JsonSerializable;
 
 /**
  * A collection of PushError objects
- *
- * @extends Collection<array-key, PushError>
  */
-final class PushErrorCollection extends Collection
+final class PushErrorCollection implements Countable, IteratorAggregate, JsonSerializable
 {
+    /** @use Collection<int, PushError> */
+    use Collection;
+
     public function __construct(PushError ...$errors)
     {
-        parent::__construct($errors);
+        $this->items = $errors;
     }
 }
