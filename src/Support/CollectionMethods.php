@@ -34,24 +34,20 @@ trait CollectionMethods
 
     /**
      * @param TValue ...$items
-     *
-     * @return self<TKey, TValue>
      */
-    public static function make(mixed ...$items): self
+    public static function make(mixed ...$items): static
     {
-        return new self(...$items);
+        return new static(...$items);
     }
 
     /**
      * @param iterable<TKey, TValue> ...$items
-     *
-     * @return self<TKey, TValue>
      */
-    public static function fromIterable(iterable $items): self
+    public static function fromIterable(iterable $items): static
     {
         $array = iterator_to_array($items);
 
-        $self = new self;
+        $self = new static;
         $self->items = $array;
 
         return $self;
@@ -139,14 +135,14 @@ trait CollectionMethods
      *
      * @param int<1, max> $length
      *
-     * @return iterable<self<TKey, TValue>>
+     * @return iterable<static>
      */
     public function chunk(int $length): iterable
     {
         $chunks = array_chunk($this->items, $length);
 
         return array_map(
-            fn(array $chunk) => new self(...$chunk),
+            fn(array $chunk) => new static(...$chunk),
             $chunks,
         );
     }
@@ -189,14 +185,12 @@ trait CollectionMethods
      * Filter the collection to items where the callback returns a truthy value
      *
      * @param ?callable(TValue, TKey): bool $callable
-     *
-     * @return self<TKey, TValue>
      */
-    public function filter(?callable $callable): self
+    public function filter(?callable $callable): static
     {
         $callable ??= fn(mixed $item) => $item;
 
-        return self::fromIterable(
+        return static::fromIterable(
             array_filter($this->items, $callable, ARRAY_FILTER_USE_BOTH)
         );
     }
@@ -228,7 +222,7 @@ trait CollectionMethods
      *
      * @param callable(TValue): TMap $callable
      *
-     * @return self<TKey, TValue>
+     * @return self<TKey, TMap>
      */
     public function map(callable $callable): self
     {
@@ -241,17 +235,15 @@ trait CollectionMethods
      * Merge a set of iterables into a single collection
      *
      * @param iterable<TKey, TValue> ...$iterables
-     *
-     * @return self<TKey, TValue>
      */
-    public function merge(iterable ...$iterables): self
+    public function merge(iterable ...$iterables): static
     {
         $arrays = array_map(
             fn(iterable $iterator) => iterator_to_array($iterator),
             $iterables,
         );
 
-        return new self(
+        return new static(
             ...array_merge($this->items, ...$arrays),
         );
     }
@@ -265,7 +257,7 @@ trait CollectionMethods
      * @param  TReturnType  $initial
      * @return TReturnType
      */
-    public function reduce(callable $callback, mixed $initial = null)
+    public function reduce(callable $callback, mixed $initial = null): mixed
     {
         return array_reduce($this->items, $callback, $initial);
     }
@@ -274,10 +266,8 @@ trait CollectionMethods
      * Filter the collection to items where the callback returns a falsy value
      *
      * @param ?callable(TValue, TKey): bool $callable
-     *
-     * @return self<TKey, TValue>
      */
-    public function reject(?callable $callable): self
+    public function reject(?callable $callable): static
     {
         $callable ??= fn(mixed $item, int|string $key) => $item;
 
@@ -288,8 +278,6 @@ trait CollectionMethods
 
     /**
      * Create a new collection with the same items but consecutive integer keys
-     *
-     * @return self<TKey, TValue>
      */
     public function values(): self
     {
