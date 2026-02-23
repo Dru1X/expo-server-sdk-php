@@ -4,7 +4,7 @@ namespace Dru1x\ExpoPush\Tests\Unit\Support;
 
 use ArrayIterator;
 use Countable;
-use Dru1x\ExpoPush\Support\Collection;
+use Dru1x\ExpoPush\Support\CollectionMethods;
 use Dru1x\ExpoPush\Support\GenericCollection;
 use IteratorAggregate;
 use JsonSerializable;
@@ -333,7 +333,7 @@ class CollectionTest extends TestCase
     }
 }
 
-class BaseCollection implements Countable, IteratorAggregate, JsonSerializable
+class BaseCollection implements Collection
 {
-    use Collection;
+    use CollectionMethods;
 }

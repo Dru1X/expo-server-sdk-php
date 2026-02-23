@@ -2,18 +2,16 @@
 
 namespace Dru1x\ExpoPush\PushToken;
 
-use Countable;
 use Dru1x\ExpoPush\Support\Collection;
-use IteratorAggregate;
-use JsonSerializable;
+use Dru1x\ExpoPush\Support\CollectionMethods;
 
 /**
  * A collection of PushToken objects
  */
-final class PushTokenCollection implements Countable, IteratorAggregate, JsonSerializable
+final class PushTokenCollection implements Collection
 {
-    /** @use Collection<int, PushToken> */
-    use Collection;
+    /** @use CollectionMethods<int, PushToken> */
+    use CollectionMethods;
 
     public function __construct(PushToken ...$pushTokens)
     {

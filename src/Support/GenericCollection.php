@@ -4,7 +4,7 @@ namespace Dru1x\ExpoPush\Support;
 
 use Countable;
 use Dru1x\ExpoPush\PushReceipt\PushReceipt;
-use Dru1x\ExpoPush\Support\Collection;
+use Dru1x\ExpoPush\Support\CollectionMethods;
 use IteratorAggregate;
 use JsonSerializable;
 
@@ -16,8 +16,8 @@ use JsonSerializable;
  *
  * @implements IteratorAggregate<TKey, TValue>
  */
-final class GenericCollection implements Countable, IteratorAggregate, JsonSerializable
+final class GenericCollection implements Collection
 {
-    /** @use Collection<TKey, TValue> */
-    use Collection;
+    /** @use CollectionMethods<TKey, TValue> */
+    use CollectionMethods;
 }

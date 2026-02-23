@@ -6,7 +6,7 @@ use Dru1x\ExpoPush\PushTicket\PushTicket;
 use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
 use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
 use Dru1x\ExpoPush\PushToken\PushToken;
-use Dru1x\ExpoPush\Support\Collection;
+use Dru1x\ExpoPush\Support\CollectionMethods;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -117,7 +117,7 @@ class PushTicketCollectionTest extends TestCase
             ),
         );
 
-        /** @var Collection<int, SuccessfulPushTicket> $mergedCollection */
+        /** @var CollectionMethods<int, SuccessfulPushTicket> $mergedCollection */
         $mergedCollection = $collection1->merge($collection2);
 
         $this->assertCount(6, $mergedCollection);
@@ -323,7 +323,7 @@ class PushTicketCollectionTest extends TestCase
             ),
         );
 
-        /** @var Collection<int, SuccessfulPushTicket> $filteredCollection */
+        /** @var CollectionMethods<int, SuccessfulPushTicket> $filteredCollection */
         $filteredCollection = $collection->filter(
             fn(SuccessfulPushTicket $ticket) => $ticket->receiptId !== 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'
         );
