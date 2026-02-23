@@ -173,7 +173,7 @@ class PushMessageCollectionTest extends TestCase
         );
 
         $this->assertCount(4, $filteredCollection);
-        $this->assertNotEquals('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]', $filteredCollection->get(3)->to);
+        $this->assertNull($filteredCollection->get(3));
     }
 
     #[Test]

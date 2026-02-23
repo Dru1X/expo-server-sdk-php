@@ -4,6 +4,7 @@ namespace Dru1x\ExpoPush\Tests\Unit\Support;
 
 use ArrayIterator;
 use Countable;
+use Dru1x\ExpoPush\Support\Collection;
 use Dru1x\ExpoPush\Support\CollectionMethods;
 use Dru1x\ExpoPush\Support\GenericCollection;
 use IteratorAggregate;
@@ -79,13 +80,12 @@ class CollectionTest extends TestCase
     public function can_break_a_collection_into_chunks(): void
     {
         $chunks = BaseCollection::fromIterable([1, 2, 3])->chunk(2);
-        $chunksArray = $chunks->all();
+        $chunksArray = iterator_to_array($chunks);
 
         $this->assertCount(2, $chunks);
         $this->assertSame([1, 2], $chunksArray[0]->all());
         $this->assertSame([3], $chunksArray[1]->all());
 
-        $this->assertInstanceOf(GenericCollection::class, $chunks);
         $this->assertInstanceOf(BaseCollection::class, $chunksArray[0]);
     }
 
@@ -198,7 +198,7 @@ class CollectionTest extends TestCase
         );
     }
 
-    protected function assertCollection(array $expected, BaseCollection|GenericCollection $actual): void
+    protected function assertCollection(array $expected, BaseCollection $actual): void
     {
         self::assertThat(
             $actual->toArray(),

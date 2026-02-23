@@ -323,13 +323,12 @@ class PushTicketCollectionTest extends TestCase
             ),
         );
 
-        /** @var CollectionMethods<int, SuccessfulPushTicket> $filteredCollection */
         $filteredCollection = $collection->filter(
             fn(SuccessfulPushTicket $ticket) => $ticket->receiptId !== 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'
         );
 
         $this->assertCount(5, $filteredCollection);
-        $this->assertNotEquals('ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', $filteredCollection->get(2)->receiptId);
+        $this->assertNull($filteredCollection->get(2));
     }
 
     #[Test]

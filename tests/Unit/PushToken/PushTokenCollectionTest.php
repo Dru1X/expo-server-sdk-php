@@ -168,7 +168,7 @@ class PushTokenCollectionTest extends TestCase
         );
 
         $this->assertCount(5, $filteredCollection);
-        $this->assertNotEquals('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]', $filteredCollection->get(4)->value);
+        $this->assertNull($filteredCollection->get(4));
     }
 
     #[Test]

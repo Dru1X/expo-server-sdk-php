@@ -198,7 +198,7 @@ class PushReceiptCollectionTest extends TestCase
         );
 
         $this->assertCount(5, $filteredCollection);
-        $this->assertNotEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $filteredCollection->get(0)->id);
+        $this->assertNull($filteredCollection->get(0));
     }
 
     #[Test]

@@ -165,7 +165,7 @@ class PushErrorCollectionTest extends TestCase
         $filteredCollection = $collection->filter(fn(PushError $error) => $error->code !== PushErrorCode::Failed);
 
         $this->assertCount(3, $filteredCollection);
-        $this->assertNotEquals(PushErrorCode::Failed, $filteredCollection->get(0)->code);
+        $this->assertNull($filteredCollection->get(0));
     }
 
     #[Test]

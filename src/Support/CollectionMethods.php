@@ -139,14 +139,15 @@ trait CollectionMethods
      *
      * @param int<1, max> $length
      *
-     * @return GenericCollection<int, self<TKey, TValue>>
+     * @return iterable<self<TKey, TValue>>
      */
-    public function chunk(int $length): GenericCollection
+    public function chunk(int $length): iterable
     {
         $chunks = array_chunk($this->items, $length);
 
-        return GenericCollection::fromIterable(
-            array_map(fn(array $chunk) => new self(...$chunk), $chunks),
+        return array_map(
+            fn(array $chunk) => new self(...$chunk),
+            $chunks,
         );
     }
 
