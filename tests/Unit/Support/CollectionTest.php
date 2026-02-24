@@ -3,12 +3,8 @@
 namespace Dru1x\ExpoPush\Tests\Unit\Support;
 
 use ArrayIterator;
-use Countable;
 use Dru1x\ExpoPush\Support\Collection;
 use Dru1x\ExpoPush\Support\CollectionMethods;
-use Dru1x\ExpoPush\Support\GenericCollection;
-use IteratorAggregate;
-use JsonSerializable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Constraint\IsIdentical;
@@ -32,7 +28,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCount(
             2,
-            BaseCollection::make(...[1, 2]),
+            BaseCollection::make(1, 2),
         );
     }
 
@@ -105,7 +101,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            BaseCollection::make(...[1, 2])->merge(...$toMerge),
+            BaseCollection::make(1, 2)->merge(...$toMerge),
         );
     }
 
@@ -152,9 +148,11 @@ class CollectionTest extends TestCase
     #[Test]
     public function can_map_over_a_collection(): void
     {
-        $this->assertCollection(
+        $result = BaseCollection::make(1, 2, 3)->map(fn(int $item) => $item * $item);
+
+        $this->assertSame(
             [1, 4, 9],
-            BaseCollection::make(1, 2, 3)->map(fn(int $item) => $item * $item),
+            iterator_to_array($result),
         );
     }
 
@@ -177,7 +175,7 @@ class CollectionTest extends TestCase
     public function can_check_if_a_collection_is_empty(): void
     {
         $empty = BaseCollection::make();
-        $notEmpty = BaseCollection::make(...[0]);
+        $notEmpty = BaseCollection::make(0);
 
         $this->assertTrue(
             $empty->isEmpty()

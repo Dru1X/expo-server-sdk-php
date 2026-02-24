@@ -222,13 +222,11 @@ trait CollectionMethods
      *
      * @param callable(TValue): TMap $callable
      *
-     * @return self<TKey, TMap>
+     * @return iterable<TKey, TMap>
      */
-    public function map(callable $callable): self
+    public function map(callable $callable): iterable
     {
-        return self::fromIterable(
-            array_map(fn(mixed $item) => $callable($item), $this->items)
-        );
+        return array_map(fn(mixed $item) => $callable($item), $this->items);
     }
 
     /**
@@ -279,8 +277,8 @@ trait CollectionMethods
     /**
      * Create a new collection with the same items but consecutive integer keys
      */
-    public function values(): self
+    public function values(): static
     {
-        return new self(...array_values($this->items));
+        return new static(...array_values($this->items));
     }
 }
