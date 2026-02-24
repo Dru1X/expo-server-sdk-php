@@ -2,9 +2,11 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushReceipt;
 
+use ArrayIterator;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Traversable;
 
 class PushReceiptIdCollectionTest extends TestCase
 {
@@ -189,7 +191,7 @@ class PushReceiptIdCollectionTest extends TestCase
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
         );
 
-        $collection->set(9, 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ');;
+        $collection->set(9, 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ');
 
         $newCollection = $collection->values();
 
@@ -253,5 +255,104 @@ JSON;
 JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
+    }
+
+    #[Test]
+    public function can_merge_a_collection_with_provided_iterables(): void
+    {
+        $collection = PushReceiptIdCollection::make()
+            ->add('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
+            ->add('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY')
+            ->merge(
+                new ArrayIterator([
+                    'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
+                    'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+                ]),
+                new ArrayIterator([
+                    'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
+                    'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
+                ])
+            );
+
+        $this->assertSame([
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+            'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
+            'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+            'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
+            'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
+        ], $collection->all());
+    }
+
+    #[Test]
+    public function can_retrieve_all_items_from_a_collection(): void
+    {
+        $collection = PushReceiptIdCollection::make(
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+        );
+
+        $this->assertSame([
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+        ], $collection->all());
+    }
+
+    #[Test]
+    public function can_create_an_iterator_from_a_collection(): void
+    {
+        $collection = PushReceiptIdCollection::make(
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+        );
+
+        $iterator = $collection->getIterator();
+
+        $this->assertInstanceOf(
+            Traversable::class,
+            $iterator,
+        );
+
+        $results = iterator_to_array($iterator);
+
+        $this->assertSame([
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+        ], $results);
+    }
+
+    #[Test]
+    public function can_check_if_a_collection_is_empty(): void
+    {
+        $empty = new PushReceiptIdCollection;
+        $notEmpty = new PushReceiptIdCollection('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+
+        $this->assertTrue(
+            $empty->isEmpty()
+        );
+
+        $this->assertFalse(
+            $notEmpty->isEmpty()
+        );
+    }
+
+    #[Test]
+    public function reject_returns_correctly_filtered_collection(): void
+    {
+        $collection = new PushReceiptIdCollection(
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+            'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
+            'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+            'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
+            'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
+        );
+
+        $filteredCollection = $collection->reject(
+            fn(string $receiptId) => $receiptId === 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'
+        );
+
+        $this->assertCount(5, $filteredCollection);
+        $this->assertNotEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $filteredCollection->get(1));
     }
 }

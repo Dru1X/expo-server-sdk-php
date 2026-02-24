@@ -2,11 +2,12 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushToken;
 
+use ArrayIterator;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
-use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Traversable;
 use TypeError;
 
 class PushTokenCollectionTest extends TestCase
@@ -290,5 +291,104 @@ JSON;
         $this->expectException(TypeError::class);
 
         PushTokenCollection::fromJson(null);
+    }
+
+    #[Test]
+    public function can_merge_a_collection_with_provided_iterables(): void
+    {
+        $collection = PushTokenCollection::make()
+            ->add(new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'))
+            ->merge(
+                new ArrayIterator([
+                    new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+                    new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+                ]),
+                new ArrayIterator([
+                    new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+                    new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+                ])
+            );
+
+        $this->assertEquals([
+            new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+            new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+            new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+            new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+        ], $collection->all());
+    }
+
+    #[Test]
+    public function can_retrieve_all_items_from_a_collection(): void
+    {
+        $collection = PushTokenCollection::make(
+            new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+            new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+        );
+
+        $this->assertEquals([
+            new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+            new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+        ], $collection->all());
+    }
+
+    #[Test]
+    public function can_create_an_iterator_from_a_collection(): void
+    {
+        $collection = PushTokenCollection::make(
+            new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+            new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+        );
+
+        $iterator = $collection->getIterator();
+
+        $this->assertInstanceOf(
+            Traversable::class,
+            $iterator,
+        );
+
+        $results = iterator_to_array($iterator);
+
+        $this->assertEquals([
+            new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+            new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+        ], $results);
+    }
+
+    #[Test]
+    public function can_check_if_a_collection_is_empty(): void
+    {
+        $empty = new PushTokenCollection;
+
+        $notEmpty = new PushTokenCollection(
+            new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+        );
+
+        $this->assertTrue(
+            $empty->isEmpty()
+        );
+
+        $this->assertFalse(
+            $notEmpty->isEmpty()
+        );
+    }
+
+    #[Test]
+    public function reject_returns_correctly_filtered_collection(): void
+    {
+        $collection = new PushTokenCollection(
+            new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+            new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+            new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+            new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+        );
+
+        $filteredCollection = $collection->reject(
+            fn(PushToken $token) => $token->value === 'ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'
+        );
+
+        $this->assertCount(4, $filteredCollection);
+        $this->assertNull($filteredCollection->get(2));
     }
 }

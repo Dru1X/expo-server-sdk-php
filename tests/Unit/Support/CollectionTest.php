@@ -3,7 +3,7 @@
 namespace Dru1x\ExpoPush\Tests\Unit\Support;
 
 use ArrayIterator;
-use Dru1x\ExpoPush\Support\Collection;
+use Dru1x\ExpoPush\Support\Collection as CollectionInterface;
 use Dru1x\ExpoPush\Support\CollectionMethods;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -19,7 +19,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             [1, 2],
-            BaseCollection::make(...$data),
+            Collection::make(...$data),
         );
     }
 
@@ -28,7 +28,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCount(
             2,
-            BaseCollection::make(1, 2),
+            Collection::make(1, 2),
         );
     }
 
@@ -38,7 +38,7 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             $expected,
-            BaseCollection::make(1, 2)->contains($item),
+            Collection::make(1, 2)->contains($item),
         );
     }
 
@@ -48,7 +48,7 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             $value,
-            BaseCollection::fromIterable([1, 2, 3, 'foo' => 4, 5])->get($key),
+            Collection::fromIterable([1, 2, 3, 'foo' => 4, 5])->get($key),
         );
     }
 
@@ -58,7 +58,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $result,
-            BaseCollection::fromIterable($existing)->add($value),
+            Collection::fromIterable($existing)->add($value),
         );
     }
 
@@ -68,21 +68,21 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             [$key => $value],
-            BaseCollection::make()->set($key, $value),
+            Collection::make()->set($key, $value),
         );
     }
 
     #[Test]
     public function can_break_a_collection_into_chunks(): void
     {
-        $chunks = BaseCollection::fromIterable([1, 2, 3])->chunk(2);
+        $chunks = Collection::fromIterable([1, 2, 3])->chunk(2);
         $chunksArray = iterator_to_array($chunks);
 
         $this->assertCount(2, $chunks);
         $this->assertSame([1, 2], $chunksArray[0]->all());
         $this->assertSame([3], $chunksArray[1]->all());
 
-        $this->assertInstanceOf(BaseCollection::class, $chunksArray[0]);
+        $this->assertInstanceOf(Collection::class, $chunksArray[0]);
     }
 
     #[Test]
@@ -91,7 +91,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            BaseCollection::fromIterable($items)->filter($callable),
+            Collection::fromIterable($items)->filter($callable),
         );
     }
 
@@ -101,7 +101,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            BaseCollection::make(1, 2)->merge(...$toMerge),
+            Collection::make(1, 2)->merge(...$toMerge),
         );
     }
 
@@ -111,7 +111,7 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             $expected,
-            BaseCollection::make(...$items)->reduce($callable, $initial),
+            Collection::make(...$items)->reduce($callable, $initial),
         );
     }
 
@@ -121,7 +121,7 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            BaseCollection::make(...$items)->values(),
+            Collection::make(...$items)->values(),
         );
     }
 
@@ -131,7 +131,7 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             $items,
-            BaseCollection::fromIterable($items)->all(),
+            Collection::fromIterable($items)->all(),
         );
     }
 
@@ -141,14 +141,14 @@ class CollectionTest extends TestCase
     {
         $this->assertSame(
             [...$items],
-            BaseCollection::fromIterable($items)->toArray(),
+            Collection::fromIterable($items)->toArray(),
         );
     }
 
     #[Test]
     public function can_map_over_a_collection(): void
     {
-        $result = BaseCollection::make(1, 2, 3)->map(fn(int $item) => $item * $item);
+        $result = Collection::make(1, 2, 3)->map(fn(int $item) => $item * $item);
 
         $this->assertSame(
             [1, 4, 9],
@@ -162,7 +162,7 @@ class CollectionTest extends TestCase
     {
         $array = $items = iterator_to_array($items);
 
-        $iterator = BaseCollection::make(...$items)->getIterator();
+        $iterator = Collection::make(...$items)->getIterator();
 
         $results = iterator_to_array($iterator);
 
@@ -174,8 +174,8 @@ class CollectionTest extends TestCase
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = BaseCollection::make();
-        $notEmpty = BaseCollection::make(0);
+        $empty = Collection::make();
+        $notEmpty = Collection::make(0);
 
         $this->assertTrue(
             $empty->isEmpty()
@@ -192,11 +192,11 @@ class CollectionTest extends TestCase
     {
         $this->assertCollection(
             $expected,
-            BaseCollection::fromIterable($items)->reject($callable),
+            Collection::fromIterable($items)->reject($callable),
         );
     }
 
-    protected function assertCollection(array $expected, BaseCollection $actual): void
+    protected function assertCollection(array $expected, Collection $actual): void
     {
         self::assertThat(
             $actual->toArray(),
@@ -304,7 +304,7 @@ class CollectionTest extends TestCase
         return [
             'array' => [[1, 2, 3]],
             'nested array' => [[1, [2], [[3]]]],
-            'nested collection' => [[1, BaseCollection::make(2), BaseCollection::make(BaseCollection::make(3))]],
+            'nested collection' => [[1, Collection::make(2), Collection::make(Collection::make(3))]],
         ];
     }
 
@@ -331,7 +331,7 @@ class CollectionTest extends TestCase
     }
 }
 
-class BaseCollection implements Collection
+class Collection implements CollectionInterface
 {
     use CollectionMethods;
 }
