@@ -3,17 +3,19 @@
 namespace Dru1x\ExpoPush\PushReceipt;
 
 use Dru1x\ExpoPush\Support\Collection;
+use Dru1x\ExpoPush\Support\CollectionMethods;
 
 /**
  * A collection of PushReceipt objects
- *
- * @extends Collection<array-key, PushReceipt>
  */
-final class PushReceiptCollection extends Collection
+final class PushReceiptCollection implements Collection
 {
-    public function __construct(PushReceipt ...$pushReceipt)
+    /** @use CollectionMethods<int, PushReceipt> */
+    use CollectionMethods;
+
+    public function __construct(PushReceipt ...$pushReceipts)
     {
-        parent::__construct($pushReceipt);
+        $this->items = $pushReceipts;
     }
 
     // Helpers ----

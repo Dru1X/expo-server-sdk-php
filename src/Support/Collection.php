@@ -2,174 +2,175 @@
 
 namespace Dru1x\ExpoPush\Support;
 
-use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use JsonSerializable;
 use Traversable;
 
 /**
- * An abstract collection class with some useful helpers
- *
  * @template TKey of array-key
  * @template TValue
- *
- * @template-implements IteratorAggregate<TKey, TValue>
  */
-abstract class Collection implements Countable, IteratorAggregate, JsonSerializable
+interface Collection extends Countable, IteratorAggregate, JsonSerializable
 {
-    use ConvertsFromJson, ConvertsToJson;
+    /**
+     * @param TValue ...$items
+     */
+    public static function make(mixed ...$items): static;
 
     /**
-     * The items contained in the collection
-     *
-     * @var array<TKey, TValue>
+     * @param iterable<TKey, TValue> ...$items
      */
-    protected array $items;
+    public static function fromIterable(iterable $items): static;
 
-    /**
-     * @param array<TKey, TValue> $items
-     */
-    public function __construct(array $items)
-    {
-        $this->items = $items;
-    }
-
-    // Helpers ----
-
-    /**
-     * Get the size of this collection
-     *
-     * @return int
-     */
-    public function count(): int
-    {
-        return count($this->items);
-    }
-
-    /**
-     * Check if this collection contains a given value
-     *
-     * @param TValue $value
-     *
-     * @return bool
-     */
-    public function contains(mixed $value): bool
-    {
-        return in_array($value, $this->items, true);
-    }
-
-    /**
-     * Get an item from this collection by its key
-     *
-     * @param int|string $index
-     *
-     * @return TValue|null
-     */
-    public function get(int|string $index): mixed
-    {
-        return $this->items[$index] ?? null;
-    }
+    // Altering ----
 
     /**
      * Add an item to this collection
      *
      * @param TValue $item
      *
-     * @return void
+     * @return $this
      */
-    public function add(mixed $item): void
-    {
-        $this->items[] = $item;
-    }
+    public function add(mixed $item): static;
 
     /**
-     * Upsert an item to this collection at a specific index
+     * Add an item to this collection at a specific key
      *
-     * @param int   $index
-     * @param mixed $item
+     * @param TKey $key
+     * @param TValue $item
      *
-     * @return void
+     * @return $this
      */
-    public function set(int $index, mixed $item): void
-    {
-        $this->items[$index] = $item;
+    public function set(int|string $key, mixed $item): static;
 
-    }
+    // Retrieving ----
 
     /**
-     * Break this collection into a set of smaller chunks
+     * Get an item from the collection by its key, or null if not present
      *
-     * @param int $size
+     * @param TKey $key
      *
-     * @return array<array-key, static<TKey, TValue>>
+     * @return TValue|null
      */
-    public function chunk(int $size): array
-    {
-        $chunks = array_chunk($this->items, $size);
-
-        return array_map(fn(array $chunk) => new static(...$chunk), $chunks);
-    }
+    public function get(int|string $key): mixed;
 
     /**
-     * Filter this collection using the given callback
-     *
-     * @param callable(TValue $item, TKey $key): bool $callback
-     *
-     * @return static
-     */
-    public function filter(callable $callback): static
-    {
-        return new static(
-            ...array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH)
-        );
-    }
-
-    /**
-     * Merge a set of collections into a single collection
-     *
-     * @param static<TKey, TValue> ...$collections
-     *
-     * @return static<TKey, TValue>
-     */
-    public function merge(self ...$collections): static
-    {
-        $items = array_reduce(
-            $collections,
-            fn(array $carry, self $collection) => array_merge($carry, $collection->items),
-            $this->items
-        );
-
-        return new static(...$items);
-    }
-
-    /**
-     * Get a new collection with the keys reset to consecutive integers
-     *
-     * @return static<TKey, TValue>
-     */
-    public function values(): static
-    {
-        return new static(...array_values($this->items));
-    }
-
-    /**
-     * Convert this collection to an array
+     * Get all items as an array
      *
      * @return array<TKey, TValue>
      */
-    public function toArray(): array
-    {
-        return $this->items;
-    }
-
-    // Internals ----
+    public function all(): array;
 
     /**
-     * @return ArrayIterator<TKey, TValue>
+     * Get all items as an array
+     *
+     * @return array<TKey, TValue>
      */
-    public function getIterator(): Traversable
-    {
-        return new ArrayIterator($this->items);
-    }
+    public function toArray(): array;
+
+    /**
+     * Retrieve an iterator for the collection
+     *
+     * @return Traversable<TKey, TValue>
+     */
+    public function getIterator(): Traversable;
+
+    // Helpers ----
+
+    /**
+     * Break the collection into chunks of the provided length
+     *
+     * @param int<1, max> $length
+     *
+     * @return iterable<static>
+     */
+    public function chunk(int $length): iterable;
+
+    /**
+     * Check if the collection contains a given value
+     *
+     * @param TValue $value
+     *
+     * @return bool
+     */
+    public function contains(mixed $value): bool;
+
+    /**
+     * Check if the collection doesnt contains a given value
+     *
+     * @param TValue $value
+     *
+     * @return bool
+     */
+    public function doesntContain(mixed $value): bool;
+
+    /**
+     * Get the number of items in the collection
+     *
+     * @return int
+     */
+    public function count(): int;
+
+    /**
+     * Filter the collection to items where the callback returns a truthy value
+     *
+     * @param ?callable(TValue, TKey): bool $callable
+     */
+    public function filter(?callable $callable): static;
+
+    /**
+     * Check if the collection contains no items
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool;
+
+    /**
+     * Check if the collection contains any items
+     *
+     * @return bool
+     */
+    public function isNotEmpty(): bool;
+
+    /**
+     * Create a new collection by running the provided callable on each of the items of this collection
+     *
+     * @template TMap of mixed
+     *
+     * @param callable(TValue): TMap $callable
+     *
+     * @return iterable<TKey, TMap>
+     */
+    public function map(callable $callable): iterable;
+
+    /**
+     * Merge a set of iterables into a single collection
+     *
+     * @param iterable<TKey, TValue> ...$iterables
+     */
+    public function merge(iterable ...$iterables): static;
+
+    /**
+     * Reduce the collection into a single value
+     *
+     * @template TReturnType
+     *
+     * @param  callable(TReturnType, TValue): TReturnType  $callback
+     * @param  TReturnType  $initial
+     * @return TReturnType
+     */
+    public function reduce(callable $callback, mixed $initial = null): mixed;
+
+    /**
+     * Filter the collection to items where the callback returns a falsy value
+     *
+     * @param ?callable(TValue, TKey): bool $callable
+     */
+    public function reject(?callable $callable): static;
+
+    /**
+     * Create a new collection with the same items but consecutive integer keys
+     */
+    public function values(): static;
 }
