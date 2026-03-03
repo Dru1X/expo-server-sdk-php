@@ -5,7 +5,6 @@ namespace Dru1x\ExpoPush\Tests\Unit\PushMessage;
 use ArrayIterator;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
 use PHPUnit\Framework\Attributes\Test;

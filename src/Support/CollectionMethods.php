@@ -160,7 +160,7 @@ trait CollectionMethods
     }
 
     /**
-     * Check if the collection doesnt contains a given value
+     * Check if the collection doesnt contain a given value
      *
      * @param TValue $value
      *
@@ -216,7 +216,7 @@ trait CollectionMethods
     }
 
     /**
-     * Create a new collection by running the provided callable on each of the items of this collection
+     * Create an iterable by running the provided callable on each of the items of this collection
      *
      * @template TMap of mixed
      *
@@ -230,7 +230,7 @@ trait CollectionMethods
     }
 
     /**
-     * Merge a set of iterables into a single collection
+     * Merge a set of iterables into a single iterable
      *
      * @param iterable<TKey, TValue> ...$iterables
      */

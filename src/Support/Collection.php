@@ -97,7 +97,7 @@ interface Collection extends Countable, IteratorAggregate, JsonSerializable
     public function contains(mixed $value): bool;
 
     /**
-     * Check if the collection doesnt contains a given value
+     * Check if the collection doesnt contain a given value
      *
      * @param TValue $value
      *
@@ -134,7 +134,7 @@ interface Collection extends Countable, IteratorAggregate, JsonSerializable
     public function isNotEmpty(): bool;
 
     /**
-     * Create a new collection by running the provided callable on each of the items of this collection
+     * Create a new iterable by running the provided callable on each of the items of this collection
      *
      * @template TMap of mixed
      *
@@ -145,7 +145,7 @@ interface Collection extends Countable, IteratorAggregate, JsonSerializable
     public function map(callable $callable): iterable;
 
     /**
-     * Merge a set of iterables into a single collection
+     * Merge a set of iterables into a single iterable
      *
      * @param iterable<TKey, TValue> ...$iterables
      */
