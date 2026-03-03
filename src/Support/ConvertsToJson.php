@@ -6,7 +6,11 @@ trait ConvertsToJson
 {
     use ConvertsToArray;
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     *
+     * @return array<array-key, mixed>
+     */
     public function jsonSerialize(): array
     {
         return $this->toArray();

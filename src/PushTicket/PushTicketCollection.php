@@ -3,16 +3,18 @@
 namespace Dru1x\ExpoPush\PushTicket;
 
 use Dru1x\ExpoPush\Support\Collection;
+use Dru1x\ExpoPush\Support\CollectionMethods;
 
 /**
  * A collection of PushTicket objects
- *
- * @extends Collection<array-key, PushTicket>
  */
-final class PushTicketCollection extends Collection
+final class PushTicketCollection implements Collection
 {
+    /** @use CollectionMethods<int, PushTicket> */
+    use CollectionMethods;
+
     public function __construct(PushTicket ...$pushTickets)
     {
-        parent::__construct($pushTickets);
+        $this->items = $pushTickets;
     }
 }

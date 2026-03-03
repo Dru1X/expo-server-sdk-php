@@ -2,12 +2,14 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushReceipt;
 
+use ArrayIterator;
 use Dru1x\ExpoPush\PushReceipt\PushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
 use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\Support\PushStatus;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Traversable;
 
 class PushReceiptCollectionTest extends TestCase
 {
@@ -198,7 +200,7 @@ class PushReceiptCollectionTest extends TestCase
         );
 
         $this->assertCount(5, $filteredCollection);
-        $this->assertNotEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $filteredCollection->get(0)->id);
+        $this->assertNull($filteredCollection->get(0));
     }
 
     #[Test]
@@ -312,5 +314,105 @@ JSON;
 JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
+    }
+
+    #[Test]
+    public function can_merge_a_collection_with_provided_iterables(): void
+    {
+        $collection = PushReceiptCollection::make()
+            ->add(new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'))
+            ->merge(
+                new ArrayIterator([
+                    new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+                    new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+                ]),
+                new ArrayIterator([
+                    new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+                    new SuccessfulPushReceipt(id: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB'),
+                ])
+            );
+
+        $this->assertEquals([
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+            new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+            new SuccessfulPushReceipt(id: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB'),
+        ], $collection->all());
+    }
+
+    #[Test]
+    public function can_retrieve_all_items_from_a_collection(): void
+    {
+        $collection = PushReceiptCollection::make(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+        );
+
+        $this->assertEquals([
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+        ], $collection->all());
+    }
+
+    #[Test]
+    public function can_create_an_iterator_from_a_collection(): void
+    {
+        $collection = PushReceiptCollection::make(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+        );
+
+        $iterator = $collection->getIterator();
+
+        $this->assertInstanceOf(
+            Traversable::class,
+            $iterator,
+        );
+
+        $results = iterator_to_array($iterator);
+
+        $this->assertEquals([
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+        ], $results);
+    }
+
+    #[Test]
+    public function can_check_if_a_collection_is_empty(): void
+    {
+        $empty = new PushReceiptCollection;
+
+        $notEmpty = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+        );
+
+        $this->assertTrue(
+            $empty->isEmpty()
+        );
+
+        $this->assertFalse(
+            $notEmpty->isEmpty()
+        );
+    }
+
+    #[Test]
+    public function reject_returns_correctly_filtered_collection(): void
+    {
+        $collection = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+            new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+            new SuccessfulPushReceipt(id: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB'),
+            new SuccessfulPushReceipt(id: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC'),
+        );
+
+        $filteredCollection = $collection->reject(
+            fn(SuccessfulPushReceipt $receipt) => $receipt->id === 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'
+        );
+
+        $this->assertCount(5, $filteredCollection);
+        $this->assertNull($filteredCollection->get(1));
     }
 }
